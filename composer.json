@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "plugin\\account\\": "account"
+            "plugin\\account\\": "src"
         }
     },
     "extra": {
