@@ -1,0 +1,47 @@
+{
+    "type": "project",
+    "name": "xiaochao/plugs-account",
+    "license": "MIT",
+    "description": "PlugsAccount for ThinkAdmin",
+    "authors": [
+        {
+            "name": "叶落无痕",
+            "email": "1262847141@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">7.1",
+        "ext-gd": "*",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "zoujingli/think-install": "^1.0|@dev",
+        "zoujingli/think-library": "^6.1|@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "plugin\\account\\": "account"
+        }
+    },
+    "extra": {
+        "config": {
+            "type": "plugin",
+            "name": "用户账号管理"
+        },
+        "think": {
+            "services": [
+                "plugin\\account\\Service"
+            ]
+        },
+        "plugin": {
+            "copy": {
+                "stc/database": "database/migrations"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "zoujingli/think-install": true
+        }
+    }
+}
