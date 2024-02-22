@@ -52,9 +52,7 @@ class InstallAccount extends Migrator
                 'name' => '用户管理',
                 'subs' => Service::menu(),
             ],
-        ], [
-            'url|node' => 'plugs-account/portal/index'
-        ]);
+        ], ['url|node' => 'plugs-account/portal/index']);
     }
 
     /**
@@ -275,7 +273,6 @@ class InstallAccount extends Migrator
             ->addColumn('create_at', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
             ->addColumn('update_at', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
             ->addIndex('type', ['name' => 'idx_account_file_type'])
-            ->addIndex('uuid', ['name' => 'idx_account_file_uuid'])
             ->addIndex('xext', ['name' => 'idx_account_file_xext'])
             ->addIndex('xkey', ['name' => 'idx_account_file_xkey'])
             ->addIndex('unid', ['name' => 'idx_account_file_unid'])
