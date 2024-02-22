@@ -32,6 +32,7 @@ class InstallAccount extends Migrator
      */
     public function change()
     {
+        $this->_create_menu();
         $this->_create_account_auth();
         $this->_create_account_bind();
         $this->_create_account_msms();
@@ -43,7 +44,7 @@ class InstallAccount extends Migrator
      * 初始化系统菜单
      * @return void
      */
-    private function insertMenu()
+    private function _create_menu()
     {
         // 初始化菜单数据
         PhinxExtend::write2menu([
