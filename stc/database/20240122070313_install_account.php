@@ -52,7 +52,7 @@ class InstallAccount extends Migrator
                 'name' => '用户管理',
                 'subs' => Service::menu(),
             ],
-        ], ['url|node' => 'plugs-account/portal/index']);
+        ], ['url|node' => 'plugin-account/portal/index']);
     }
 
     /**
