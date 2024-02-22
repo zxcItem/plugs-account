@@ -49,7 +49,6 @@ class InstallAccount extends Migrator
         // 初始化菜单数据
         PhinxExtend::write2menu([
             [
-                'id'   => 100,
                 'name' => '用户管理',
                 'subs' => Service::menu(),
             ],
