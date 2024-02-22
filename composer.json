@@ -1,5 +1,5 @@
 {
-    "type": "project",
+    "type": "think-admin-plugin",
     "name": "xiaochao/plugs-account",
     "license": "MIT",
     "description": "PlugsAccount for ThinkAdmin",
