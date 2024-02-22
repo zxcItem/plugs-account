@@ -3,9 +3,9 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller;
+namespace plugin\account\controller;
 
-use app\account\model\AccountUser;
+use plugin\account\model\AccountUser;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 use think\db\exception\DataNotFoundException;
@@ -15,7 +15,7 @@ use think\db\exception\ModelNotFoundException;
 /**
  * 用户账号管理
  * @class Master
- * @package app\account\controller
+ * @package plugin\account\controller
  */
 class Master extends Controller
 {

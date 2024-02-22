@@ -1,9 +1,9 @@
 <?php
 
-namespace app\account\controller;
+namespace plugin\account\controller;
 
-use app\account\model\AccountFile;
-use app\account\model\AccountUser;
+use plugin\account\model\AccountFile;
+use plugin\account\model\AccountUser;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 use think\admin\Storage;
@@ -14,7 +14,7 @@ use think\db\exception\ModelNotFoundException;
 /**
  * 用户附件管理
  * @class File
- * @package app\account\controller
+ * @package plugin\account\controller
  */
 class File extends Controller
 {

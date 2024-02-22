@@ -2,18 +2,18 @@
 
 declare (strict_types=1);
 
-namespace app\account\service;
+namespace plugin\account\service;
 
-use app\account\model\AccountAuth;
-use app\account\service\contract\AccountAccess;
-use app\account\service\contract\AccountInterface;
+use plugin\account\model\AccountAuth;
+use plugin\account\service\contract\AccountAccess;
+use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
 use think\admin\extend\JwtExtend;
 
 /**
  * 用户账号调度器
  * @class Account
- * @package app\account\service
+ * @package plugin\account\service
  */
 abstract class Account
 {

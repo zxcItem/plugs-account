@@ -3,12 +3,12 @@
 
 declare (strict_types=1);
 
-namespace app\account\model;
+namespace plugin\account\model;
 
 /**
  * 账号短信验证模型
  * @class AccountMsms
- * @package app\account\model
+ * @package plugin\account\model
  */
 class AccountMsms extends Abs
 {

@@ -3,14 +3,14 @@
 
 declare (strict_types=1);
 
-namespace app\account\model;
+namespace plugin\account\model;
 
 use think\model\relation\HasOne;
 
 /**
  * 用户附件管理
  * @class AccountFile
- * @package app\account\model
+ * @package plugin\account\model
  */
 class AccountFile extends Abs
 {

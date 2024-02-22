@@ -3,17 +3,17 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller\api;
+namespace plugin\account\controller\api;
 
 use app\wechat\service\WechatService;
-use app\account\service\Account;
+use plugin\account\service\Account;
 use think\admin\Controller;
 use think\Response;
 
 /**
  * 微信服务号入口
  * @class Wechat
- * @package app\account\controller\api
+ * @package plugin\account\controller\api
  * @example 域名请修改为自己的地址，放到网页代码合适位置
  *
  * <meta name="referrer" content="always">

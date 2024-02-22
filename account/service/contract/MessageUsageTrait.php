@@ -3,15 +3,15 @@
 
 declare (strict_types=1);
 
-namespace app\account\service\contract;
+namespace plugin\account\service\contract;
 
-use app\account\model\AccountMsms;
+use plugin\account\model\AccountMsms;
 use think\admin\Exception;
 
 /**
  * 短信通用接口
  * @class MessageUsageTrait
- * @package app\account\service\contract
+ * @package plugin\account\service\contract
  */
 trait MessageUsageTrait
 {

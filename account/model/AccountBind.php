@@ -2,16 +2,16 @@
 
 declare (strict_types=1);
 
-namespace app\account\model;
+namespace plugin\account\model;
 
-use app\account\service\Account;
+use plugin\account\service\Account;
 use think\model\relation\HasMany;
 use think\model\relation\HasOne;
 
 /**
  * 用户子账号模型
  * @class AccountBind
- * @package app\account\model
+ * @package plugin\account\model
  */
 class AccountBind extends Abs
 {

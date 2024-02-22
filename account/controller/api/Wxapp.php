@@ -3,10 +3,10 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller\api;
+namespace plugin\account\controller\api;
 
 use app\wechat\service\WechatService;
-use app\account\service\Account;
+use plugin\account\service\Account;
 use think\admin\Controller;
 use think\admin\Exception;
 use think\exception\HttpResponseException;
@@ -18,7 +18,7 @@ use WeMini\Qrcode;
 /**
  * 微信小程序入口
  * @class Wxapp
- * @package app\account\controller\api
+ * @package plugin\account\controller\api
  */
 class Wxapp extends Controller
 {

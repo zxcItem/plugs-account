@@ -2,10 +2,10 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller;
+namespace plugin\account\controller;
 
-use app\account\model\AccountBind;
-use app\account\service\Account;
+use plugin\account\model\AccountBind;
+use plugin\account\service\Account;
 use think\admin\Controller;
 use think\admin\Exception;
 use think\admin\helper\QueryHelper;
@@ -16,7 +16,7 @@ use think\db\exception\ModelNotFoundException;
 /**
  * 终端账号管理
  * @class Device
- * @package app\account\controller
+ * @package plugin\account\controller
  */
 class Device extends Controller
 {

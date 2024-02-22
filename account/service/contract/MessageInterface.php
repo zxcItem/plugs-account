@@ -3,16 +3,16 @@
 
 declare (strict_types=1);
 
-namespace app\account\service;
+namespace plugin\account\service;
 
-namespace app\account\service\contract;
+namespace plugin\account\service\contract;
 
 use think\admin\Exception;
 
 /**
  * 通用短信接口类
  * @class MessageInterface
- * @package app\account\service\contract
+ * @package plugin\account\service\contract
  */
 interface MessageInterface
 {

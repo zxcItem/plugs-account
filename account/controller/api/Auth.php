@@ -2,17 +2,17 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller\api;
+namespace plugin\account\controller\api;
 
-use app\account\service\Account;
-use app\account\service\contract\AccountInterface;
+use plugin\account\service\Account;
+use plugin\account\service\contract\AccountInterface;
 use think\admin\Controller;
 use think\exception\HttpResponseException;
 
 /**
  * 接口授权抽象类
  * @class Auth
- * @package app\account\controller\api
+ * @package plugin\account\controller\api
  */
 abstract class Auth extends Controller
 {

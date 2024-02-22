@@ -1,16 +1,16 @@
 <?php
 
-namespace app\account\controller;
+namespace plugin\account\controller;
 
-use app\account\model\AccountUser;
-use app\account\service\Source;
+use plugin\account\model\AccountUser;
+use plugin\account\service\Source;
 use think\admin\Controller;
 use think\db\exception\DbException;
 
 /**
  * 用户数据统计表
  * @class Portal
- * @package app\account\controller
+ * @package plugin\account\controller
  */
 class Portal extends Controller
 {

@@ -3,7 +3,7 @@
 
 declare (strict_types=1);
 
-namespace app\account\service\contract;
+namespace plugin\account\service\contract;
 
 use think\admin\Exception;
 use think\db\exception\DbException;
@@ -11,7 +11,7 @@ use think\db\exception\DbException;
 /**
  * 用户账号接口类
  * @class AccountInterface
- * @package app\account\service\contract
+ * @package plugin\account\service\contract
  */
 interface AccountInterface
 {

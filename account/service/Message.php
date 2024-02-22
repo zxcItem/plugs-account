@@ -3,10 +3,10 @@
 
 declare (strict_types=1);
 
-namespace app\account\service;
+namespace plugin\account\service;
 
-use app\account\service\contract\MessageInterface;
-use app\account\service\message\Alisms;
+use plugin\account\service\contract\MessageInterface;
+use plugin\account\service\message\Alisms;
 use think\admin\Exception;
 use think\admin\Library;
 
@@ -14,7 +14,7 @@ use think\admin\Library;
  * 短信服务调度器
  * @class Message
  * @mixin MessageInterface
- * @package app\account\service
+ * @package plugin\account\service
  */
 abstract class Message
 {

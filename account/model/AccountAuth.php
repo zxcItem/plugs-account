@@ -3,14 +3,14 @@
 
 declare (strict_types=1);
 
-namespace app\account\model;
+namespace plugin\account\model;
 
 use think\model\relation\HasOne;
 
 /**
  * 子账号授权模型
  * @class AccountAuth
- * @package app\account\model
+ * @package plugin\account\model
  */
 class AccountAuth extends Abs
 {

@@ -2,7 +2,7 @@
 
 declare (strict_types=1);
 
-namespace app\account;
+namespace plugin\account;
 
 use think\admin\Plugin;
 

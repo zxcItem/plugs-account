@@ -3,12 +3,12 @@
 
 declare (strict_types=1);
 
-namespace app\account\service\contract;
+namespace plugin\account\service\contract;
 
-use app\account\model\AccountAuth;
-use app\account\model\AccountBind;
-use app\account\model\AccountUser;
-use app\account\service\Account;
+use plugin\account\model\AccountAuth;
+use plugin\account\model\AccountBind;
+use plugin\account\model\AccountUser;
+use plugin\account\service\Account;
 use think\admin\Exception;
 use think\admin\extend\CodeExtend;
 use think\admin\extend\JwtExtend;
@@ -17,7 +17,7 @@ use think\App;
 /**
  * 用户账号通用类
  * @class AccountAccess
- * @package app\account\service\contract
+ * @package plugin\account\service\contract
  */
 class AccountAccess implements AccountInterface
 {

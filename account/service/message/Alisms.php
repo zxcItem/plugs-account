@@ -3,10 +3,10 @@
 
 declare (strict_types=1);
 
-namespace app\account\service\message;
+namespace plugin\account\service\message;
 
-use app\account\service\contract\MessageInterface;
-use app\account\service\contract\MessageUsageTrait;
+use plugin\account\service\contract\MessageInterface;
+use plugin\account\service\contract\MessageUsageTrait;
 use think\admin\Exception;
 use think\admin\extend\CodeExtend;
 use think\admin\extend\HttpExtend;
@@ -14,7 +14,7 @@ use think\admin\extend\HttpExtend;
 /**
  * 阿里云短信服务
  * @class Alisms
- * @package app\account\service\message
+ * @package plugin\account\service\message
  */
 class Alisms implements MessageInterface
 {

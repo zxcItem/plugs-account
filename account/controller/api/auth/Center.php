@@ -3,11 +3,11 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller\api\auth;
+namespace plugin\account\controller\api\auth;
 
-use app\account\controller\api\Auth;
-use app\account\model\AccountFile;
-use app\account\service\Message;
+use plugin\account\controller\api\Auth;
+use plugin\account\model\AccountFile;
+use plugin\account\service\Message;
 use think\admin\Exception;
 use think\admin\service\RuntimeService;
 use think\admin\Storage;
@@ -15,7 +15,7 @@ use think\admin\Storage;
 /**
  * 用户账号管理
  * @class Center
- * @package app\account\controller\api\auth
+ * @package plugin\account\controller\api\auth
  */
 class Center extends Auth
 {

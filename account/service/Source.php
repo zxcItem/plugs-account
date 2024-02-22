@@ -1,8 +1,8 @@
 <?php
 
-namespace app\account\service;
+namespace plugin\account\service;
 
-use app\account\model\AccountUser;
+use plugin\account\model\AccountUser;
 
 /**
  * 用户来源分析

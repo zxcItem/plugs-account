@@ -3,14 +3,14 @@
 
 declare (strict_types=1);
 
-namespace app\account\model;
+namespace plugin\account\model;
 
 use think\admin\Model;
 
 /**
  * 模型抽象类
  * @class Abs
- * @package app\account\model
+ * @package plugin\account\model
  */
 abstract class Abs extends Model
 {

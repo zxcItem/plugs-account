@@ -2,10 +2,10 @@
 
 declare (strict_types=1);
 
-namespace app\account\controller\api;
+namespace plugin\account\controller\api;
 
-use app\account\service\Account;
-use app\account\service\Message;
+use plugin\account\service\Account;
+use plugin\account\service\Message;
 use think\admin\Controller;
 use think\admin\Exception;
 use think\admin\extend\ImageVerify;
@@ -14,7 +14,7 @@ use think\admin\service\RuntimeService;
 /**
  * 手机号登录入口
  * @class Login
- * @package app\account\controller\api
+ * @package plugin\account\controller\api
  */
 class Login extends Controller
 {
