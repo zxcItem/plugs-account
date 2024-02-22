@@ -1,5 +1,6 @@
 <?php
 
+use plugin\account\Service;
 use think\admin\extend\PhinxExtend;
 use think\migration\Migrator;
 
@@ -36,6 +37,23 @@ class InstallAccount extends Migrator
         $this->_create_account_msms();
         $this->_create_account_user();
         $this->_create_account_file();
+    }
+
+    /**
+     * 初始化系统菜单
+     * @return void
+     */
+    private function insertMenu()
+    {
+        // 初始化菜单数据
+        PhinxExtend::write2menu([
+            [
+                'name' => '用户管理',
+                'subs' => Service::menu(),
+            ],
+        ], [
+            'url|node' => 'plugs-account/portal/index'
+        ]);
     }
 
     /**

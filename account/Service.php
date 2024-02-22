@@ -38,18 +38,13 @@ class Service extends Plugin
             [
                 'name' => '用户管理',
                 'subs' => [
-                    [
-                        'name' => '用户管理',
-                        'subs' => [
-                            ['name' => '数据统计报表', 'icon' => 'layui-icon layui-icon-chart', 'node' => "{$code}/portal/index"],
-                            ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$code}/master/index"],
-                            ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$code}/device/index"],
-                            ['name' => '用户短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$code}/message/index"],
-                            ['name' => '用户附件管理', 'icon' => 'layui-icon layui-icon-file', 'node' => "{$code}/file/index"],
-                        ],
-                    ],
+                    ['name' => '数据统计报表', 'icon' => 'layui-icon layui-icon-chart', 'node' => "{$code}/portal/index"],
+                    ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-user', 'node' => "{$code}/master/index"],
+                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$code}/device/index"],
+                    ['name' => '用户短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$code}/message/index"],
+                    ['name' => '用户附件管理', 'icon' => 'layui-icon layui-icon-file', 'node' => "{$code}/file/index"],
                 ],
-            ]
+            ],
         ];
     }
 }
