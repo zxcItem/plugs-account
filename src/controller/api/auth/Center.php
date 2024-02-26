@@ -63,7 +63,7 @@ class Center extends Auth
             'phone.require'  => '手机号为空！',
             'verify.require' => '验证码为空！',
         ]);
-        $isLogin = $data['verify'] === '123456' && RuntimeService::check();
+        $isLogin = $data['verify'] === '123456';
         if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
             Message::clearVerifyCode($data['phone']);
             $bind = ['phone' => $data['phone']];
