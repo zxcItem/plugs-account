@@ -47,7 +47,7 @@ class File extends Controller
             $this->title = '用户附件管理';
             $this->xexts = AccountFile::mk()->distinct()->column('xext');
         }, static function (QueryHelper $query) {
-            $query->with(['user'])->like('name,xext')->equal('type')->dateBetween('create_at');
+            $query->with(['user'])->like('name,xext')->equal('type')->dateBetween('create_time');
             $db = AccountUser::mQuery()->like('email|nickname|username|phone#user')->db();
             if ($db->getOptions('where')) $query->whereRaw("unid in {$db->field('id')->buildSql()}");
         });

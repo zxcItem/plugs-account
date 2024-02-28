@@ -270,8 +270,8 @@ class InstallAccount extends Migrator
             ->addColumn('unid', 'biginteger', ['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '会员编号'])
             ->addColumn('isfast', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '是否秒传'])
             ->addColumn('issafe', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '安全模式'])
-            ->addColumn('create_at', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
-            ->addColumn('update_at', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
+            ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
+            ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
             ->addIndex('type', ['name' => 'idx_account_file_type'])
             ->addIndex('xext', ['name' => 'idx_account_file_xext'])
             ->addIndex('xkey', ['name' => 'idx_account_file_xkey'])
@@ -279,7 +279,6 @@ class InstallAccount extends Migrator
             ->addIndex('name', ['name' => 'idx_account_file_name'])
             ->addIndex('issafe', ['name' => 'idx_account_file_issafe'])
             ->addIndex('isfast', ['name' => 'idx_account_file_isfast'])
-            ->addIndex('create_at', ['name' => 'idx_account_file_create_at'])
             ->create();
 
         // 修改主键长度
