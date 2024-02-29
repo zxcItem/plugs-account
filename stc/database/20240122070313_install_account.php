@@ -38,6 +38,7 @@ class InstallAccount extends Migrator
         $this->_create_account_msms();
         $this->_create_account_user();
         $this->_create_account_file();
+        $this->_create_account_relation();
     }
 
     /**
@@ -235,6 +236,50 @@ class InstallAccount extends Migrator
             ->addIndex('status', ['name' => 'idx_account_user_status'])
             ->addIndex('deleted', ['name' => 'idx_account_user_deleted'])
             ->addIndex('create_time', ['name' => 'idx_account_user_create_time'])
+            ->create();
+
+        // 修改主键长度
+        $this->table($table)->changeColumn('id', 'integer', ['limit' => 11, 'identity' => true]);
+    }
+
+    /**
+     * 创建数据对象
+     * @class AccountRelation
+     * @table account_relation
+     * @return void
+     */
+    private function _create_account_relation() {
+
+        // 当前数据表
+        $table = 'account_relation';
+
+        // 存在则跳过
+        if ($this->hasTable($table)) return;
+
+        // 创建数据表
+        $this->table($table, [
+            'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '用户-关系',
+        ])
+            ->addColumn('unid','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '当前用户'])
+            ->addColumn('puid0','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '临时代理'])
+            ->addColumn('puid1','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '上1级代理'])
+            ->addColumn('puid2','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '上2级代理'])
+            ->addColumn('path','string',['limit' => 180, 'default' => '', 'null' => true, 'comment' => '关系路径'])
+            ->addColumn('extra','text',['default' => NULL, 'null' => true, 'comment' => '扩展数据'])
+            ->addColumn('level_code','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '等级编号'])
+            ->addColumn('level_name','string',['limit' => 180, 'default' => '', 'null' => true, 'comment' => '等级名称'])
+            ->addColumn('buy_vip_entry','integer',['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '入会礼包'])
+            ->addColumn('buy_last_date','datetime',['default' => NULL, 'null' => true, 'comment' => '最后购买'])
+            ->addColumn('sort','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '排序权重'])
+            ->addColumn('create_time','datetime',['default' => NULL, 'null' => true, 'comment' => '创建时间'])
+            ->addColumn('update_time','datetime',['default' => NULL, 'null' => true, 'comment' => '更新时间'])
+            ->addIndex('unid', ['name' => 'idx_account_relation_unid'])
+            ->addIndex('path', ['name' => 'idx_account_relation_path'])
+            ->addIndex('puid1', ['name' => 'idx_account_relation_puid1'])
+            ->addIndex('puid2', ['name' => 'idx_account_relation_puid2'])
+            ->addIndex('level_code', ['name' => 'idx_account_relation_level_code'])
+            ->addIndex('create_time', ['name' => 'idx_account_relation_create_time'])
+            ->addIndex('buy_vip_entry', ['name' => 'idx_account_relation_buy_vip_entry'])
             ->create();
 
         // 修改主键长度
