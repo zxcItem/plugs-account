@@ -4,6 +4,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller\api;
 
+use plugin\account\model\AccountRelation;
 use plugin\account\service\Account;
 use plugin\account\service\Message;
 use think\admin\Controller;
@@ -40,6 +41,7 @@ class Login extends Controller
             $account = Account::mk($data['type']);
             $account->set($inset = ['phone' => $data['phone']]);
             $account->isBind() || $account->bind($inset, $inset);
+            AccountRelation::sync($account->get()['id']);
             $this->success('关联账号成功！', $account->get(true));
         } else {
             $this->error('短信验证失败！');
