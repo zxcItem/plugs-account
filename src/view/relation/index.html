@@ -147,7 +147,7 @@
     <a class="layui-btn layui-btn-sm layui-btn-danger" data-confirm="确定要永久删除此账号吗？" data-action="{:url('remove')}" data-value="id#{{d.unid}}">删 除</a>
     <!--{/if}-->
     <!--{if auth('parent')}-->
-    <a class="layui-btn layui-btn-sm" data-modal="{:url('parent')}" data-value="id#{{d.id}}" data-title="设置上级代理">上 级</a>
+    <a class="layui-btn layui-btn-sm" data-modal="{:url('parent')}?unid={{d.unid}}" data-value="unid#{{d.unid}}" data-title="设置上级代理">上 级</a>
     <!--{/if}-->
 </script>
 {/block}

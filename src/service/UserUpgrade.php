@@ -77,22 +77,22 @@ class UserUpgrade
                 $user->save([
                     'pids'  => $mode > 0 ? 1 : 0,
                     'path'  => $path1,
-                    'puid0' => $agent['unid'],
+                    'puid0' => $mode > 0 ? 0 : $agent['unid'],
                     'puid1' => $agent['unid'],
                     'puid2' => $agent['puid1'],
                     'layer' => substr_count($path1, ',')
                 ]);
                 // 更新下级代理
-                $path2 = ",{$user['path']}{$user['id']},";p($path2);
+                $path2 = ",{$user['unid']},";
                 if (AccountRelation::mk()->whereLike('path', "{$path2}%")->count() > 0) {
                     foreach (AccountRelation::mk()->whereLike('path', "{$path2}%")->order('layer desc')->select() as $item) {
-                        $attr = array_reverse(str2arr($path3 = preg_replace("#^{$path2}#", "{$path1}{$user['id']},", $item['path'])));
+                        $attr = array_reverse(str2arr($path3 = preg_replace("#^{$path2}#", "{$path1}{$user['unid']},", $item['path'])));
                         $item->save([
                             'path'  => $path3,
-                            'puid0' => $attr[0] ?? 0,
+                            'puid0' => $mode > 0 ? 0 : $attr[0],
                             'puid1' => $attr[0] ?? 0,
                             'puid2' => $attr[1] ?? 0,
-                            'layer' => substr_count($path3, '-')
+                            'layer' => substr_count($path3, ',')
                         ]);
                     }
                 }

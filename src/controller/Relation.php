@@ -6,7 +6,9 @@ namespace plugin\account\controller;
 
 use plugin\account\model\AccountUser;
 use plugin\account\model\AccountRelation;
+use plugin\account\service\UserUpgrade;
 use think\admin\Controller;
+use think\admin\Exception;
 use think\admin\helper\QueryHelper;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -83,6 +85,17 @@ class Relation extends Controller
      */
     public function parent()
     {
-        $this->index();
+        if($this->request->isGet()){
+            $this->index();
+        }else{
+            try {
+                $data = $this->_vali(['pid.require' => '待绑定代理不能为空！', 'unid.require' => '待操作用户不能为空！']);
+                UserUpgrade::bindAgent(intval($data['unid']), intval($data['pid']), 2);
+                sysoplog('前端用户管理', "修改用户[{$data['unid']}]的代理为用户[{$data['pid']}]");
+                $this->success('上级修改成功！');
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+            }
+        }
     }
 }
