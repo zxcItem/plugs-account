@@ -81,21 +81,13 @@ class AccountRelation extends Abs
     /**
      * 更新用户推荐关系
      * @param integer $unid 用户编号
-     * @param integer $from 上级用户
-     * @return bool|string
+     * @return void
      */
-    public static function sync(int $unid, int $from = 0)
+    public static function sync(int $unid)
     {
-        $user = AccountUser::mk()->findOrEmpty($unid);
-        if ($user->isEmpty()) return '无效的用户信息';
-        $data = ['unid' => $unid, 'path' => ',,'];
-        if ($from > 0) {
-            $parent = static::mk()->where(['unid' => $from])->findOrEmpty();
-            if ($parent->isEmpty()) return '无效的上级用户';
-            $data['path'] = arr2str(str2arr("{$from},{$parent->getAttr('path')}"));
-            $data['puid1'] = $parent->getAttr('unid');
-            $data['puid2'] = $parent->getAttr('puid1');
+        $user = static::mk()->where('unid',$unid)->findOrEmpty();
+        if ($user->isEmpty()) {
+            $user->save(['unid' => $unid]);
         }
-        return static::mk()->where(['unid' => $unid])->findOrEmpty()->save($data);
     }
 }

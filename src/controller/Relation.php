@@ -51,7 +51,7 @@ class Relation extends Controller
      */
     public function sync()
     {
-        $this->_queue('刷新会员用户数据', 'xdata:mall:users');
+        $this->_queue('刷新会员用户数据', 'plugin:mall:users');
     }
 
     /**
