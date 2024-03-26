@@ -41,7 +41,7 @@ class Login extends Controller
             $account = Account::mk($data['type']);
             $account->set($inset = ['phone' => $data['phone']]);
             $account->isBind() || $account->bind($inset, $inset);
-            AccountRelation::sync($account->get()['id']);
+            AccountRelation::initRelation($account->get()['id']);
             $this->success('关联账号成功！', $account->get(true));
         } else {
             $this->error('短信验证失败！');

@@ -4,6 +4,7 @@ declare (strict_types=1);
 
 namespace plugin\account;
 
+use plugin\account\model\AccountRelation;
 use think\admin\Plugin;
 
 /**
@@ -25,6 +26,18 @@ class Service extends Plugin
      */
     protected $package = 'xiaochao/plugs-account';
 
+    /**
+     * 插件服务注册
+     * @return void
+     */
+    public function register(): void
+    {
+        // 注册用户绑定事件
+        $this->app->event->listen('AccountBind', function (array $data) {
+            $this->app->log->notice("Event AccountBind {$data['unid']}#{$data['usid']}");
+            AccountRelation::initRelation(intval($data['unid']));
+        });
+    }
 
     /**
      * 菜单配置

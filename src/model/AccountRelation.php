@@ -6,6 +6,7 @@ declare (strict_types=1);
 namespace plugin\account\model;
 
 
+use think\admin\Exception;
 use think\model\relation\HasOne;
 
 /**
@@ -81,13 +82,24 @@ class AccountRelation extends Abs
     /**
      * 更新用户推荐关系
      * @param integer $unid 用户编号
-     * @return void
+     * @param integer $from 绑定上级
+     * @return $this
+     * @throws Exception
      */
-    public static function sync(int $unid)
+    public static function initRelation(int $unid, int $from = 0):AccountRelation
     {
-        $user = static::mk()->where('unid',$unid)->findOrEmpty();
-        if ($user->isEmpty()) {
-            $user->save(['unid' => $unid]);
+        $user = AccountUser::mk()->findOrEmpty($unid);
+        if ($user->isEmpty()) throw new Exception("无效的用户！");
+        $data = ['unid' => $unid, 'path' => ','];
+        $rela = static::mk()->where(['unid' => $unid])->findOrEmpty();
+        if ($from > 0 && empty($rela->getAttr('path'))) {
+            $parent = static::mk()->where(['unid' => $from])->findOrEmpty();
+            if ($parent->isEmpty()) throw new Exception("无效的上级！");
+            $data['path'] = arr2str(str2arr("{$from},{$parent->getAttr('path')}"));
+            $data['puid1'] = $parent->getAttr('unid');
+            $data['puid2'] = $parent->getAttr('puid1');
         }
+        $rela->save($data);
+        return $rela;
     }
 }
