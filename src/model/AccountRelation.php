@@ -82,24 +82,17 @@ class AccountRelation extends Abs
     /**
      * 更新用户推荐关系
      * @param integer $unid 用户编号
-     * @param integer $from 绑定上级
      * @return $this
      * @throws Exception
      */
-    public static function initRelation(int $unid, int $from = 0):AccountRelation
+    public static function make(int $unid): AccountRelation
     {
         $user = AccountUser::mk()->findOrEmpty($unid);
         if ($user->isEmpty()) throw new Exception("无效的用户！");
-        $data = ['unid' => $unid, 'path' => ','];
         $rela = static::mk()->where(['unid' => $unid])->findOrEmpty();
-        if ($from > 0 && empty($rela->getAttr('path'))) {
-            $parent = static::mk()->where(['unid' => $from])->findOrEmpty();
-            if ($parent->isEmpty()) throw new Exception("无效的上级！");
-            $data['path'] = arr2str(str2arr("{$from},{$parent->getAttr('path')}"));
-            $data['puid1'] = $parent->getAttr('unid');
-            $data['puid2'] = $parent->getAttr('puid1');
+        if ($rela->isEmpty() || empty($rela->getAttr('path')) || empty($rela->getAttr('level_name'))) {
+            $rela->save(['unid' => $unid, 'path' => ',', 'level_name' => '普通用户']);
         }
-        $rela->save($data);
         return $rela;
     }
 }

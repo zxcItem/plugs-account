@@ -262,7 +262,7 @@ class InstallAccount extends Migrator
             'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '用户-关系',
         ])
             ->addColumn('unid','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '当前用户'])
-            ->addColumn('puid0','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '临时代理'])
+            ->addColumn('puid0', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '绑定状态'])
             ->addColumn('puid1','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '上1级代理'])
             ->addColumn('puid2','biginteger',['limit' => 20, 'default' => 0, 'null' => true, 'comment' => '上2级代理'])
             ->addColumn('pids','integer',['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '绑定状态'])

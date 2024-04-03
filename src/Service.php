@@ -35,7 +35,7 @@ class Service extends Plugin
         // 注册用户绑定事件
         $this->app->event->listen('AccountBind', function (array $data) {
             $this->app->log->notice("Event AccountBind {$data['unid']}#{$data['usid']}");
-            AccountRelation::initRelation(intval($data['unid']));
+            AccountRelation::make(intval($data['unid']));
         });
     }
 
@@ -46,7 +46,7 @@ class Service extends Plugin
     public static function menu(): array
     {
         // 设置插件菜单
-        $code = app(static::class)->appCode;
+        $code = self::getAppCode();
         return [
             [
                 'name' => '用户管理',
