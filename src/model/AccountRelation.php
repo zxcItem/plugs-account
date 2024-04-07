@@ -26,15 +26,6 @@ class AccountRelation extends Abs
     }
 
     /**
-     * 关联临时上级
-     * @return HasOne
-     */
-    public function user0(): HasOne
-    {
-        return $this->hasOne(AccountUser::class, 'id', 'puid0');
-    }
-
-    /**
      * 关联上1级用户
      * @return HasOne
      */
@@ -53,30 +44,21 @@ class AccountRelation extends Abs
     }
 
     /**
-     * 关联临时上级关系
-     * @return HasOne
-     */
-    public function relation0(): HasOne
-    {
-        return $this->hasOne(AccountRelation::class, 'unid', 'puid0')->with('user');
-    }
-
-    /**
      * 关联上1级关系
      * @return HasOne
      */
-    public function relation1(): HasOne
+    public function agent1(): HasOne
     {
-        return $this->hasOne(AccountRelation::class, 'unid', 'puid1')->with('user');
+        return $this->hasOne(AccountRelation::class, 'unid', 'puid1');
     }
 
     /**
      * 关联上2级关系
      * @return HasOne
      */
-    public function relation2(): HasOne
+    public function agent2(): HasOne
     {
-        return $this->hasOne(AccountRelation::class, 'unid', 'puid2')->with('user');
+        return $this->hasOne(AccountRelation::class, 'unid', 'puid2');
     }
 
     /**

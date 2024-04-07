@@ -197,7 +197,7 @@ abstract class Account
     {
         if ($token === AccountAccess::tester) {
             $map = ['token' => $token];
-            empty($type) or ($map['type'] = $type);
+            empty($type) || ($map['type'] = $type);
             $auth = AccountAuth::mk()->where($map)->findOrEmpty();
             if ($auth->isEmpty()) throw new Exception('账号不存在！');
             return static::mk($type = $auth->getAttr('type'), $auth->getAttr('token'));

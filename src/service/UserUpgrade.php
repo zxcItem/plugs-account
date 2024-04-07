@@ -29,22 +29,16 @@ class UserUpgrade
      * @return array
      * @throws Exception
      */
-    public static function withAgent(int $unid, int $puid, ?array $relation = null): array
+    public static function withAgent(int $unid, int $puid, $relation = null): array
     {
-        if (empty($relation)) {
-            $relation = AccountRelation::mk()->where(['unid' => $unid])->findOrEmpty()->toArray();
-            if ($relation) throw new Exception("无效的关联信息");
-        }
+        $relation = $relation ?: AccountRelation::make($unid)->toArray();
         // 绑定代理数据
-        $puid0 = $relation['puid0'] ?? 0; // 临时绑定
         $puid1 = $relation['puid1'] ?? 0; // 上1级代理
         $puid2 = $relation['puid2'] ?? 0; // 上2级代理
-        if (empty($puid) && empty($puid1) && $puid0 > 0) {
-            $puid1 = $puid0;
-            $puid2 = intval(AccountRelation::mk()->where(['unid' => $puid0])->value('puid1'));
-        } elseif ($puid > 0 && empty($puid1)) {
-            $puid1 = $puid;
-            $puid2 = self::bindAgent($unid, $puid1, 0)['puid1'] ?? 0;
+        if (empty($relation['puids']) && $puid > 0) {
+            $relation = self::bindAgent($unid, $puid, 0);
+            $puid1 = $relation->getAttr('puid1') ?: 0; // 上1级代理
+            $puid2 = $relation->getAttr('puid2') ?: 0; // 上2级代理
         }
         return ['unid' => $unid, 'puid1' => $puid1, 'puid2' => $puid2];
     }
@@ -57,47 +51,42 @@ class UserUpgrade
      * @return array
      * @throws Exception
      */
-    public static function bindAgent(int $unid, int $puid = 0, int $mode = 1): array
+    public static function bindAgent(int $unid, int $puid = 0, int $mode = 1)
     {
         try {
-            $user = AccountRelation::mk()->where(['unid' => $unid])->findOrEmpty();
-            if ($user->isEmpty()) throw new Exception('查询用户失败');
-            if ($user->getAttr('puid1') && $mode !== 2) throw new Exception('已经绑定代理');
+            $relation = AccountRelation::make($unid);
+            // 已经绑定代理
+            $puid1 = intval($relation->getAttr('puid1'));
+            if ($puid1 > 0 && $relation->getAttr('puids') > 0) {
+                if ($puid1 !== $puid && $mode !== 0) throw new Exception('已绑定代理！');
+            }
             // 检查代理用户
-            if (empty($puid)) $puid = $user->getAttr('puid0');
-            if (empty($puid)) throw new Exception('代理不存在');
-            if ($unid == $puid) throw new Exception('不能绑定自己');
-            // 检查代理资格
-            $agent = AccountRelation::mk()->where(['unid' => $puid])->findOrEmpty();
-            if ($agent->isEmpty()) throw new Exception('代理无推荐资格');
-            if (strpos($agent->getAttr('path'), ",{$unid},") !== false) throw new Exception('不能绑定下级');
-            Library::$sapp->db->transaction(static function () use ($user, $agent, $mode) {
+            if (empty($puid)) $puid = $puid1;
+            if (empty($puid)) throw new Exception('代理不存在！');
+            if ($unid === $puid) throw new Exception('不能绑定自己！');
+            // 检查上级用户
+            $parent = AccountRelation::make($puid);
+            if (strpos($parent->getAttr('path'), ",{$unid},") !== false) throw new Exception('不能绑定下级');
+            Library::$sapp->db->transaction(static function () use ($relation, $parent, $mode) {
                 // 更新用户代理
-                $path1 = rtrim($agent['path'] ?: ',', ',') . ",{$agent['unid']},";
-                $user->save([
+                $path1 = rtrim($parent->getAttr('path') ?: ',', ',') . ",{$parent->getAttr('unid')},";
+                $relation->save([
                     'pids'  => $mode > 0 ? 1 : 0,
                     'path'  => $path1,
-                    'puid0' => $mode > 0 ? 0 : $agent['unid'],
-                    'puid1' => $agent['unid'],
-                    'puid2' => $agent['puid1'],
+                    'puids' => $mode > 0 ? 1 : 0,
+                    'puid1' => $parent->getAttr('unid'),
+                    'puid2' => $parent->getAttr('puid1'),
                     'layer' => substr_count($path1, ',')
                 ]);
                 // 更新下级代理
-                $path2 = ",{$user['unid']},";
-                if (AccountRelation::mk()->whereLike('path', "{$path2}%")->count() > 0) {
-                    foreach (AccountRelation::mk()->whereLike('path', "{$path2}%")->order('layer desc')->select() as $item) {
-                        $attr = array_reverse(str2arr($path3 = preg_replace("#^{$path2}#", "{$path1}{$user['unid']},", $item['path'])));
-                        $item->save([
-                            'path'  => $path3,
-                            'puid0' => $mode > 0 ? 0 : $attr[0],
-                            'puid1' => $attr[0] ?? 0,
-                            'puid2' => $attr[1] ?? 0,
-                            'layer' => substr_count($path3, ',')
-                        ]);
-                    }
+                $path2 = arr2str(str2arr("{$relation->getAttr('path')},{$relation->getAttr('unid')}"));
+                foreach (AccountRelation::mk()->whereLike('path', "{$path2}%")->order('layer desc')->cursor() as $item) {
+                    $text = arr2str(str2arr("{$path1},{$relation->getAttr('unid')}"));
+                    $attr = array_reverse(str2arr($path3 = preg_replace("#^{$path2}#", $text, $item->getAttr('path'))));
+                    $item->save(['path' => $path3, 'puid1' => $attr[0] ?? 0, 'puid2' => $attr[1] ?? 0]);
                 }
             });
-            return $agent->toArray();
+            return $relation->toarray();
         } catch (Exception $exception) {
             throw $exception;
         } catch (\Exception $exception) {

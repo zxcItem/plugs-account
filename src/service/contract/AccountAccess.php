@@ -192,9 +192,6 @@ class AccountAccess implements AccountInterface
     {
         if ($this->client->isEmpty()) throw new Exception('终端账号异常！');
         $user = AccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
-        if ($this->client->getAttr('unid') > 0 && ($user->isEmpty() || $this->client->getAttr('unid') !== $user['id'])) {
-            throw new Exception("已绑定用户！");
-        }
         if (!empty($data['extra'])) {
             $user->setAttr('extra', array_merge($user->getAttr('extra'), $data['extra']));
         }
@@ -326,10 +323,8 @@ class AccountAccess implements AccountInterface
         if ($this->client->isEmpty()) {
             throw new Exception('需要重新登录！', 401);
         }
-        if ($this->access->getAttr('token') !== static::tester) {
-            if ($this->expire > 0 && $this->access->getAttr('time') < time()) {
-                throw new Exception('登录认证超时！', 403);
-            }
+        if ($this->expire > 0 && $this->access->getAttr('time') < time()) {
+            throw new Exception('登录认证超时！', 403);
         }
         return static::expire()->get();
     }
@@ -341,9 +336,15 @@ class AccountAccess implements AccountInterface
      */
     public function token(int $usid): AccountInterface
     {
-        // 清理无效令牌
-        AccountAuth::mk()->where('token', '<>', self::tester)->whereBetween('time', [1, time()])->delete();
-        if ($this->access->isEmpty()) $this->access = AccountAuth::mk()->where(['usid' => $usid])->findOrEmpty();
+        // 十分之一概率清理令牌
+        if (mt_rand(1, 100) < 10) {
+            AccountAuth::mk()->whereBetween('time', [1, time()])->delete();
+        }
+        // 查询该通道历史授权记录
+        if ($this->access->isEmpty()) {
+            $where = ['usid' => $usid, 'type' => $this->type];
+            $this->access = AccountAuth::mk()->where($where)->findOrEmpty();
+        }
         // 生成新令牌数据
         if ($this->access->isEmpty()) {
             do $check = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
