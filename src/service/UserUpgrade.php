@@ -31,7 +31,7 @@ class UserUpgrade
      */
     public static function withAgent(int $unid, int $puid, $relation = null): array
     {
-        $relation = $relation ?: AccountRelation::make($unid)->toArray();
+        $relation = $relation ?: AccountRelation::sync($unid)->toArray();
         // 绑定代理数据
         $puid1 = $relation['puid1'] ?? 0; // 上1级代理
         $puid2 = $relation['puid2'] ?? 0; // 上2级代理
@@ -54,7 +54,7 @@ class UserUpgrade
     public static function bindAgent(int $unid, int $puid = 0, int $mode = 1)
     {
         try {
-            $relation = AccountRelation::make($unid);
+            $relation = AccountRelation::sync($unid);
             // 已经绑定代理
             $puid1 = intval($relation->getAttr('puid1'));
             if ($puid1 > 0 && $relation->getAttr('puids') > 0) {
@@ -65,7 +65,7 @@ class UserUpgrade
             if (empty($puid)) throw new Exception('代理不存在！');
             if ($unid === $puid) throw new Exception('不能绑定自己！');
             // 检查上级用户
-            $parent = AccountRelation::make($puid);
+            $parent = AccountRelation::sync($puid);
             if (strpos($parent->getAttr('path'), ",{$unid},") !== false) throw new Exception('不能绑定下级');
             Library::$sapp->db->transaction(static function () use ($relation, $parent, $mode) {
                 // 更新用户代理

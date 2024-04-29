@@ -52,6 +52,7 @@ class Message extends Controller
     {
         AccountMsms::mQuery()->layTable(function () {
             $this->title = '手机短信管理';
+            $this->scenes = MessageService::$scenes;
         }, static function (QueryHelper $query) {
             $query->equal('status')->like('smsid,scene,phone')->dateBetween('create_time');
         });

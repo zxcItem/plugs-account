@@ -35,7 +35,7 @@ class Service extends Plugin
         // 注册用户绑定事件
         $this->app->event->listen('AccountBind', function (array $data) {
             $this->app->log->notice("Event AccountBind {$data['unid']}#{$data['usid']}");
-            AccountRelation::make(intval($data['unid']));
+            AccountRelation::sync(intval($data['unid']));
         });
     }
 

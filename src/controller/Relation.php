@@ -37,7 +37,7 @@ class Relation extends Controller
         }, function (QueryHelper $query) {
             $query->with(['user', 'agent1', 'agent2', 'user1', 'user2'])->equal('level_code');
             // 用户内容查询
-            $user = AccountUser::mQuery()->dateBetween('create_at');
+            $user = AccountUser::mQuery()->dateBetween('create_time');
             $user->equal('status')->like('code|phone|username|nickname#user');
             $user->where(['status' => intval($this->type === 'index'), 'deleted' => 0]);
             $query->whereRaw("unid in {$user->db()->field('id')->buildSql()}");

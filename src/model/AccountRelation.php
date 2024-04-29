@@ -62,12 +62,27 @@ class AccountRelation extends Abs
     }
 
     /**
+     * 绑定用户数据
+     * @return HasOne
+     */
+    public function bindUser(): HasOne
+    {
+        return $this->user()->bind([
+            'user_phone'       => 'phone',
+            'user_headimg'     => 'headimg',
+            'user_username'    => 'username',
+            'user_nickname'    => 'nickname',
+            'user_create_time' => 'create_time',
+        ]);
+    }
+
+    /**
      * 更新用户推荐关系
      * @param integer $unid 用户编号
      * @return $this
      * @throws Exception
      */
-    public static function make(int $unid): AccountRelation
+    public static function sync(int $unid): AccountRelation
     {
         $user = AccountUser::mk()->findOrEmpty($unid);
         if ($user->isEmpty()) throw new Exception("无效的用户！");
