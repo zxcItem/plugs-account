@@ -39,6 +39,12 @@ interface AccountInterface
     public function init($token = '', bool $isjwt = true): AccountInterface;
 
     /**
+     * 获取用户编号
+     * @return integer
+     */
+    public function unid(): int;
+
+    /**
      * 绑定主账号
      * @param array $map 主账号条件
      * @param array $data 主账号资料

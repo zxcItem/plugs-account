@@ -330,6 +330,16 @@ class AccountAccess implements AccountInterface
     }
 
     /**
+     * 获取用户UNID
+     * @return integer
+     */
+    public function unid(): int
+    {
+        if ($this->client->isEmpty()) return 0;
+        return intval($this->client->getAttr('unid'));
+    }
+
+    /**
      * 生成授权令牌
      * @param integer $usid
      * @return AccountInterface

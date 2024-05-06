@@ -5,8 +5,10 @@ declare (strict_types=1);
 namespace plugin\account\controller\api;
 
 use plugin\account\model\AccountRelation;
+use plugin\account\model\AccountUser;
 use plugin\account\service\Account;
 use plugin\account\service\Message;
+use plugin\wemall\service\UserUpgrade;
 use think\admin\Controller;
 use think\admin\Exception;
 use think\admin\extend\ImageVerify;
@@ -36,8 +38,7 @@ class Login extends Controller
             if (Account::field($data['type']) !== 'phone') {
                 $this->error('不支持登录！');
             }
-            $isLogin = $data['verify'] === '123456';
-            if ($isLogin || Message::checkVerifyCode($data['verify'], $data['phone'])) {
+            if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
                 Message::clearVerifyCode($data['phone']);
                 $account = Account::mk($data['type']);
                 $account->set($inset = ['phone' => $data['phone']]);
@@ -91,6 +92,38 @@ class Login extends Controller
     }
 
     /**
+     * 用户注册绑定
+     * @return void
+     * @throws Exception
+     */
+    public function register()
+    {
+        $data = $this->_vali([
+            'type.require'   => '接口类型为空！',
+            'phone.mobile'   => '登录手机错误！',
+            'phone.require'  => '登录手机为空！',
+            'verify.require' => '短信验证为空！',
+            'passwd.require' => '密码不能为空！',
+            'fphone.default' => ''
+        ]);
+        if (Message::checkVerifyCode($data['verify'], $data['phone'], Message::tRegister)) {
+            Message::clearVerifyCode($data['phone'], Message::tRegister);
+            $account = Account::mk($data['type']);
+            $account->set($inset = ['phone' => $data['phone']]);
+            $account->isBind() || $account->bind($inset, $inset);
+            $account->pwdModify($data['passwd']);
+            // 尝试临时绑定推荐人
+            if (!empty($data['fphone'])) {
+                $from = AccountUser::mk()->where(['phone' => $data['fphone']])->value('id');
+                if ($from > 0) UserUpgrade::bindAgent($account->unid(), $from, 0);
+            }
+            $this->success('注册成功！', $account->get(true));
+        } else {
+            $this->error('短信验证失败！');
+        }
+    }
+
+    /**
      * 通过短信找回密码
      * @return void
      * @throws Exception
@@ -130,12 +163,12 @@ class Login extends Controller
         ]);
         // 发送手机短信验证码
         if (ImageVerify::verify($data['uniqid'], $data['verify'], true) === 1) {
-            if ($data['type'] === 'login') {
-                [$state, $info, $result] = Message::sendVerifyCode($data['phone']);
+            if (isset(Message::$scenes[$type = strtoupper($data['type'])])) {
+                [$state, $info, $result] = Message::sendVerifyCode($data['phone'], 120, $type);
+                $state ? $this->success($info, $result) : $this->error($info);
             } else {
-                [$state, $info, $result] = Message::sendVerifyCode($data['phone'], 120, Message::tForget);
+                $this->error('无效通道！');
             }
-            $state ? $this->success($info, $result) : $this->error($info);
         } else {
             $this->error('拼图验证失败！');
         }

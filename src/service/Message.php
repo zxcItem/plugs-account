@@ -17,6 +17,7 @@ use think\admin\Library;
  */
 abstract class Message
 {
+    public const tLogin = 'LOGIN';
     public const tForget = 'FORGET';
     public const tRegister = 'REGISTER';
 
@@ -25,6 +26,7 @@ abstract class Message
      * @var string[]
      */
     public static $scenes = [
+        self::tLogin    => '用户登录验证',
         self::tForget   => '找回用户密码',
         self::tRegister => '用户注册绑定',
     ];
@@ -52,7 +54,7 @@ abstract class Message
      * @param string $scene 业务场景
      * @return array [state, message, [timeout]]
      */
-    public static function sendVerifyCode(string $phone, int $wait = 120, string $scene = 'REGISTER'): array
+    public static function sendVerifyCode(string $phone, int $wait = 120, string $scene = self::tLogin): array
     {
         try {
             $ckey = self::genCacheKey($phone, $scene);
@@ -82,7 +84,7 @@ abstract class Message
      * @return boolean
      * @throws Exception
      */
-    public static function checkVerifyCode(string $vcode, string $phone, string $scene = 'REGISTER'): bool
+    public static function checkVerifyCode(string $vcode, string $phone, string $scene = self::tLogin): bool
     {
         if (stripos(Library::$sapp->request->domain(), '.thinkadmin.top') !== false) {
             if ($vcode === '123456') return true;
@@ -97,7 +99,7 @@ abstract class Message
      * @param string $scene
      * @return boolean
      */
-    public static function clearVerifyCode(string $phone, string $scene = 'REGISTER'): bool
+    public static function clearVerifyCode(string $phone, string $scene = self::tLogin): bool
     {
         try {
             return Library::$sapp->cache->delete(static::genCacheKey($phone, $scene));
@@ -113,7 +115,7 @@ abstract class Message
      * @return string
      * @throws Exception
      */
-    private static function genCacheKey(string $phone, string $scene = 'REGISTER'): string
+    private static function genCacheKey(string $phone, string $scene = self::tLogin): string
     {
         if (isset(array_change_key_case(static::$scenes)[strtolower($scene)])) {
             return md5(strtolower("sms-{$scene}-{$phone}"));
