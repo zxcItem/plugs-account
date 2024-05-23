@@ -11,7 +11,9 @@ use plugin\account\service\Message;
 use plugin\wemall\service\UserUpgrade;
 use think\admin\Controller;
 use think\admin\Exception;
+use think\admin\extend\CodeExtend;
 use think\admin\extend\ImageVerify;
+use think\admin\extend\JwtExtend;
 use think\admin\service\RuntimeService;
 use think\exception\HttpResponseException;
 
@@ -30,23 +32,61 @@ class Login extends Controller
     {
         try {
             $data = $this->_vali([
-                'type.require'   => '类型为空！',
-                'phone.mobile'   => '手机号错误！',
-                'phone.require'  => '手机号为空！',
-                'verify.require' => '验证码为空！'
+                'type.require'   => '类型为空',
+                'phone.mobile'   => '手机号错误',
+                'phone.require'  => '手机号为空',
+                'verify.require' => '验证码为空'
             ]);
             if (Account::field($data['type']) !== 'phone') {
-                $this->error('不支持登录！');
+                $this->error('不支持登录');
             }
             if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
                 Message::clearVerifyCode($data['phone']);
-                $account = Account::mk($data['type']);
                 $account->set($inset = ['phone' => $data['phone']]);
+                $inset = ['phone' => $data['phone'], 'deleted' => 0];
+                if (Account::enableAutoReigster()) {
+                    $account = Account::mk($data['type']);
+                    $account->set($inset);
+                } else {
+                    // 通过手机查询所有终端
+                    $account = Account::mk('', $inset);
+                    if ($account->isNull()) $this->error('手机未注册');
+                    // 如果当前终端账号不存在则创建
+                    if ($account->type() !== $data['type']) {
+                        $account = Account::mk($data['type'], $inset);
+                        $account->isNull() && $account->set($inset) && $account->bind($inset, $inset);
+                    }
+                }
                 $account->isBind() || $account->bind($inset, $inset);
-                AccountRelation::sync($account->get()['id']);
-                $this->success('关联账号成功！', $account->get(true));
+                $this->success('登录成功', $account->expire()->get(true));
             } else {
-                $this->error('短信验证失败！');
+                $this->error('验证失败');
+            }
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+    }
+
+    /**
+     * 自动授权登录
+     * @return void
+     */
+    public function auto()
+    {
+        try {
+            $data = $this->_vali(['code.require' => '授权编号为空！']);
+            $vars = CodeExtend::decrypt($data['code'], JwtExtend::jwtkey());
+            if (is_array($vars) && isset($vars['unid'])) {
+                $account = Account::mk(Account::WAP, ['unid' => $vars['unid']]);
+                if ($account->isNull()) {
+                    $this->error('登录失败！');
+                } else {
+                    $this->success('登录成功！', $account->token()->get(true));
+                }
+            } else {
+                $this->error('解密失败！');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -63,26 +103,33 @@ class Login extends Controller
     {
         try {
             $data = $this->_vali([
-                'type.require'     => '接口类型为空！',
-                'phone.mobile'     => '登录手机错误！',
-                'phone.require'    => '登录手机为空！',
-                'uniqid.require'   => '拼图编号为空！',
-                'verify.require'   => '拼图位置为空！',
-                'password.require' => '登录密码为空！',
+                'type.require'     => '接口类型为空',
+                'phone.mobile'     => '登录手机错误',
+                'phone.require'    => '登录手机为空',
+                'uniqid.require'   => '拼图编号为空',
+                'verify.require'   => '拼图位置为空',
+                'password.require' => '登录密码为空',
             ]);
             if (Account::field($data['type']) !== 'phone') {
-                $this->error('不支持登录！');
+                $this->error('不支持密码');
             }
             if (ImageVerify::verify($data['uniqid'], $data['verify'], true) !== 1) {
-                $this->error('拼图验证失败！');
+                $this->error('拼图验证失败');
             }
-            $account = Account::mk($data['type'], $inset = ['phone' => $data['phone']]);
-            if ($account->isNull()) $this->error('该手机未注册！');
+            $inset = ['phone' => $data['phone'], 'deleted' => 0];
+            // 通过手机查询所有终端
+            $account = Account::mk('', $inset);
+            if ($account->isNull()) $this->error('手机未注册');
             if ($account->pwdVerify($data['password'])) {
+                // 如果当前终端账号不存在则创建
+                if ($account->type() !== $data['type']) {
+                    $account = Account::mk($data['type'], $inset);
+                    $account->isNull() && $account->set($inset) && $account->bind($inset, $inset);
+                }
                 $account->isBind() || $account->bind($inset, $inset);
-                $this->success('登录成功！', $account->get(true));
+                $this->success('登录成功', $account->get(true));
             } else {
-                $this->error('密码错误！');
+                $this->error('密码错误');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -94,57 +141,65 @@ class Login extends Controller
     /**
      * 用户注册绑定
      * @return void
-     * @throws Exception
      */
     public function register()
     {
-        $data = $this->_vali([
-            'type.require'   => '接口类型为空！',
-            'phone.mobile'   => '登录手机错误！',
-            'phone.require'  => '登录手机为空！',
-            'verify.require' => '短信验证为空！',
-            'passwd.require' => '密码不能为空！',
-            'fphone.default' => ''
-        ]);
-        if (Message::checkVerifyCode($data['verify'], $data['phone'], Message::tRegister)) {
-            Message::clearVerifyCode($data['phone'], Message::tRegister);
-            $account = Account::mk($data['type']);
-            $account->set($inset = ['phone' => $data['phone']]);
-            $account->isBind() || $account->bind($inset, $inset);
-            $account->pwdModify($data['passwd']);
-            // 尝试临时绑定推荐人
-            if (!empty($data['fphone'])) {
-                $from = AccountUser::mk()->where(['phone' => $data['fphone']])->value('id');
-                if ($from > 0) UserUpgrade::bindAgent($account->unid(), $from, 0);
+        try {
+            $data = $this->_vali([
+                'type.require'   => '接口类型为空',
+                'phone.mobile'   => '登录手机错误',
+                'phone.require'  => '登录手机为空',
+                'verify.require' => '短信验证为空',
+                'passwd.require' => '密码不能为空',
+                'fphone.default' => ''
+            ]);
+            if (Message::checkVerifyCode($data['verify'], $data['phone'], Message::tRegister)) {
+                Message::clearVerifyCode($data['phone'], Message::tRegister);
+                $account = Account::mk($data['type']);
+                $account->set($inset = ['phone' => $data['phone'], 'deleted' => 0]);
+                $account->isBind() || $account->bind($inset, $inset);
+                $account->pwdModify($data['passwd']);
+                // 触发注册事件
+                $this->app->event->trigger('PluginAccountRegister', $account);
+                $this->success('注册成功', $account->get(true));
+            } else {
+                $this->error('验证失败');
             }
-            $this->success('注册成功！', $account->get(true));
-        } else {
-            $this->error('短信验证失败！');
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            $this->error($exception->getMessage());
         }
     }
 
     /**
      * 通过短信找回密码
      * @return void
-     * @throws Exception
      */
     public function forget()
     {
-        $data = $this->_vali([
-            'type.require'   => '接口类型为空！',
-            'phone.mobile'   => '登录手机错误！',
-            'phone.require'  => '登录手机为空！',
-            'verify.require' => '短信验证为空！',
-            'passwd.require' => '密码不能为空！',
-        ]);
-        if (Message::checkVerifyCode($data['verify'], $data['phone'], Message::tForget)) {
-            Message::clearVerifyCode($data['phone'], Message::tForget);
-            $account = Account::mk($data['type'], ['phone' => $data['phone']]);
-            if ($account->isNull()) $this->error('该账号不存在！');
-            $account->pwdModify($data['passwd']);
-            $this->success('密码重置成功！', $account->get(true));
-        } else {
-            $this->error('短信验证失败！');
+        try {
+            $data = $this->_vali([
+                'type.require'   => '接口类型为空',
+                'phone.mobile'   => '登录手机错误',
+                'phone.require'  => '登录手机为空',
+                'verify.require' => '短信验证为空',
+                'passwd.require' => '密码不能为空',
+            ]);
+            if (Message::checkVerifyCode($data['verify'], $data['phone'], Message::tForget)) {
+                Message::clearVerifyCode($data['phone'], Message::tForget);
+                $inset = ['phone' => $data['phone'], 'deleted' => 0];
+                $account = Account::mk($data['type'], $inset);
+                if ($account->isNull()) $this->error('账号不存在');
+                $account->pwdModify($data['passwd']);
+                $this->success('重置成功', $account->expire()->get(true));
+            } else {
+                $this->error('验证失败');
+            }
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            $this->error($exception->getMessage());
         }
     }
 
@@ -170,7 +225,7 @@ class Login extends Controller
                 $this->error('无效通道！');
             }
         } else {
-            $this->error('拼图验证失败！');
+            $this->error('验证失败！');
         }
     }
 
@@ -185,10 +240,8 @@ class Login extends Controller
             syspath('public/static/theme/img/login/bg2.jpg'),
         ];
         $image = ImageVerify::render($images[array_rand($images)]);
-        $this->success('生成拼图成功！', [
-            'bgimg'  => $image['bgimg'],
-            'water'  => $image['water'],
-            'uniqid' => $image['code'],
+        $this->success('生成拼图成功', [
+            'bgimg' => $image['bgimg'], 'water' => $image['water'], 'uniqid' => $image['code'],
         ]);
     }
 
@@ -203,8 +256,7 @@ class Login extends Controller
             'verify.require' => '拼图数值为空！'
         ]);
         // state: [ -1:需要刷新, 0:验证失败, 1:验证成功 ]
-        $this->success('获取验证结果！', [
-            'state' => ImageVerify::verify($data['uniqid'], $data['verify'])
-        ]);
+        $state = ImageVerify::verify($data['uniqid'], $data['verify']);
+        $this->success('验证结果', ['state' => $state]);
     }
 }
