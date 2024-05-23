@@ -42,7 +42,6 @@ class Login extends Controller
             }
             if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
                 Message::clearVerifyCode($data['phone']);
-                $account->set($inset = ['phone' => $data['phone']]);
                 $inset = ['phone' => $data['phone'], 'deleted' => 0];
                 if (Account::enableAutoReigster()) {
                     $account = Account::mk($data['type']);
