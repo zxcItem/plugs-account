@@ -28,16 +28,22 @@ class AccountAccess implements AccountInterface
     protected $app;
 
     /**
+     * 当前用户对象
+     * @var AccountUser
+     */
+    protected $user;
+
+    /**
      * 当前认证对象
      * @var AccountAuth
      */
-    protected $access;
+    protected $auth;
 
     /**
      * 当前终端对象
      * @var AccountBind
      */
-    protected $client;
+    protected $bind;
 
     /**
      * 当前通道类型
@@ -93,21 +99,25 @@ class AccountAccess implements AccountInterface
      */
     public function init($token = '', bool $isjwt = true): AccountInterface
     {
-        if (empty($token)) {
-            $this->access = AccountAuth::mk();
-            $this->client = AccountBind::mk();
+        $this->isjwt = $isjwt;
+        $this->auth = AccountAuth::mk();
+        $this->bind = AccountBind::mk();
+        $this->user = AccountUser::mk();
+        if (is_string($token)) {
+            $map = ['type' => $this->type, 'token' => $token];
+            $this->auth = AccountAuth::mk()->where($map)->findOrEmpty();
+            $this->bind = $this->auth->client()->findOrEmpty();
+            $this->user = $this->bind->user()->findOrEmpty();
         } elseif (is_array($token)) {
             $map = ['deleted' => 0];
             if ($this->type) $map['type'] = $this->type;
-            $this->client = AccountBind::mk()->where($map)->where($token)->findOrEmpty();
-            $map = ['usid' => intval($this->client->getAttr('id')), 'type' => $this->type];
-            $this->access = AccountAuth::mk()->where($map)->findOrEmpty();
-        } else {
-            $map = ['type' => $this->type, 'token' => $token];
-            $this->access = AccountAuth::mk()->where($map)->findOrEmpty();
-            $this->client = $this->access->client()->findOrEmpty();
+            $this->bind = AccountBind::mk()->where($map)->where($token)->findOrEmpty();
+            $this->user = $this->bind->user()->findOrEmpty();
+            if ($this->bind->isExists()) {
+                if (empty($this->type)) $this->type = $this->bind->getAttr('type');
+                if ($this->auth->isEmpty()) $this->token(false);
+            }
         }
-        $this->isjwt = $isjwt;
         return $this;
     }
 
@@ -122,66 +132,73 @@ class AccountAccess implements AccountInterface
     {
         // 如果传入授权验证字段
         if (isset($data[$this->field])) {
-            if ($this->client->isExists()) {
-                if ($data[$this->field] !== $this->client->getAttr($this->field)) {
+            if ($this->bind->isExists()) {
+                if ($data[$this->field] !== $this->bind->getAttr($this->field)) {
                     throw new Exception('禁止强行关联！');
                 }
             } else {
                 $map = [$this->field => $data[$this->field]];
                 if ($this->type) $map['type'] = $this->type;
-                $this->client = AccountBind::mk()->where($map)->findOrEmpty();
+                $this->bind = AccountBind::mk()->where($map)->findOrEmpty();
             }
-        } elseif ($this->client->isEmpty()) {
+        } elseif ($this->bind->isEmpty()) {
             throw new Exception("字段 {$this->field} 为空！");
         }
-        $this->client = $this->save(array_merge($data, ['type' => $this->type]));
-        if ($this->client->isEmpty()) throw new Exception('更新资料失败！');
+        $this->bind = $this->save(array_merge($data, ['type' => $this->type]));
+        if ($this->bind->isEmpty()) throw new Exception('更新资料失败！');
         return $this->token()->get($rejwt);
     }
 
     /**
      * 获取用户数据
      * @param boolean $rejwt 返回令牌
+     * @param bool $refresh 刷新数据
      * @return array
      */
-    public function get(bool $rejwt = false): array
+    public function get(bool $rejwt = false, bool $refresh = false): array
     {
-        $data = $this->client->hidden(['sort', 'password'])->toArray();
-        if ($this->client->isExists()) {
-            $data['user'] = $this->client->user()->findOrEmpty()->hidden(['sort', 'password'])->toArray();
+        if ($refresh) {
+            $this->bind->isExists() && $this->bind->refresh();
+            $this->user->isExists() && $this->user->refresh();
+        }
+        $data = $this->bind->hidden(['sort', 'password'], true)->toArray();
+        if ($this->bind->isExists()) {
+            $data['user'] = $this->user->hidden(['sort', 'password'], true)->toArray();
             if ($rejwt) $data['token'] = $this->isjwt ? JwtExtend::token([
-                'type' => $this->access->getAttr('type'), 'token' => $this->access->getAttr('token')
-            ]) : $this->access->getAttr('token');
+                'type' => $this->auth->getAttr('type'), 'token' => $this->auth->getAttr('token')
+            ]) : $this->auth->getAttr('token');
         }
         return $data;
     }
 
     /**
      * 验证终端密码
-     * @param string $pwd
+     * @param string $pass 待验证密码
      * @return boolean
      */
-    public function pwdVerify(string $pwd): bool
+    public function pwdVerify(string $pass): bool
     {
-        $pass = md5("Think{$pwd}Admin");
-        if (($user = $this->client->user()->findOrEmpty())->isExists()) {
-            if ($user->getAttr('password') === $pass && $this->expire()) return true;
-        }
-        return $this->client->getAttr('password') === $pass && $this->expire();
+        $pass = md5("Think{$pass}Admin");
+        if ($this->user->getAttr('password') === $pass) return !!$this->expire();
+        return $this->bind->getAttr('password') === $pass && $this->expire();
     }
 
     /**
      * 修改终端密码
-     * @param string $pwd
+     * @param string $pass 待修改密码
+     * @param bool $event 触发事件
      * @return boolean
      */
-    public function pwdModify(string $pwd): bool
+    public function pwdModify(string $pass, bool $event = true): bool
     {
-        if ($this->client->isEmpty()) return false;
-        $data = ['password' => md5("Think{$pwd}Admin")];
-        $user = $this->client->user()->findOrEmpty();
-        $user->isExists() && $user->save($data);
-        return $this->client->save($data);
+        if ($this->bind->isEmpty()) return false;
+        $data = ['password' => md5("Think{$pass}Admin")];
+        $this->user->isExists() && $this->user->save($data);
+        if (!$this->bind->save($data)) return false;
+        if ($event) $this->app->event->trigger('PluginAccountChangePassword', [
+            'unid' => $this->getUnid(), 'pass' => $pass
+        ]);
+        return true;
     }
 
     /**
@@ -193,35 +210,35 @@ class AccountAccess implements AccountInterface
      */
     public function bind(array $map, array $data = []): array
     {
-        if ($this->client->isEmpty()) throw new Exception('终端账号异常！');
-        $user = AccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
-        if (!empty($data['extra'])) $user->setAttr('extra', array_merge($user->getAttr('extra'), $data['extra']));
+        if ($this->bind->isEmpty()) throw new Exception('终端账号异常！');
+        $this->user = AccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
+        if (!empty($data['extra'])) $this->user->setAttr('extra', array_merge($this->user->getAttr('extra'), $data['extra']));
         unset($data['id'], $data['code'], $data['extra']);
         // 生成新的用户编号
-        if ($user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
+        if ($this->user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
         while (AccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
         // 自动绑定默认头像
-        if (empty($data['headimg']) && $user->isEmpty() || empty($user->getAttr('headimg'))) {
-            if (empty($data['headimg'] = $this->client->getAttr('headimg'))) $data['headimg'] = Account::headimg();
+        if (empty($data['headimg']) && $this->user->isEmpty() || empty($this->user->getAttr('headimg'))) {
+            if (empty($data['headimg'] = $this->bind->getAttr('headimg'))) $data['headimg'] = Account::headimg();
         }
         // 自动生成用户昵称
-        if (empty($data['nickname']) && empty($user->getAttr('nickname'))) {
-            if (empty($data['nickname'] = $this->client->getAttr('nickname'))) {
+        if (empty($data['nickname']) && empty($this->user->getAttr('nickname'))) {
+            if (empty($data['nickname'] = $this->bind->getAttr('nickname'))) {
                 $name = Account::get($this->type)['name'] ?? $this->type;
-                $data['nickname'] = "{$name}{$this->client->getAttr('id')}";
+                $data['nickname'] = "{$name}{$this->bind->getAttr('id')}";
             }
         }
         // 同步用户登录密码
-        if (!empty($this->client->getAttr('password'))) {
-            $data['password'] = $this->client->getAttr('password');
+        if (!empty($this->bind->getAttr('password'))) {
+            $data['password'] = $this->bind->getAttr('password');
         }
         // 保存更新用户数据
-        if ($user->save($data + $map)) {
-            $this->client->save(['unid' => $user['id']]);
+        if ($this->user->save($data + $map)) {
+            $this->bind->save(['unid' => $this->user['id']]);
             $this->app->event->trigger('AccountBind', [
                 'type' => $this->type,
-                'unid' => intval($user['id']),
-                'usid' => intval($this->client->getAttr('id')),
+                'unid' => intval($this->user->getAttr('id')),
+                'usid' => intval($this->bind->getAttr('id')),
             ]);
             return $this->get();
         } else {
@@ -236,15 +253,15 @@ class AccountAccess implements AccountInterface
      */
     public function unBind(): array
     {
-        if ($this->client->isEmpty()) {
+        if ($this->bind->isEmpty()) {
             throw new Exception('终端账号异常！');
         }
-        if (($unid = $this->client->getAttr('unid')) > 0) {
-            $this->client->save(['unid' => 0]);
+        if (($unid = $this->bind->getAttr('unid')) > 0) {
+            $this->bind->save(['unid' => 0]);
             $this->app->event->trigger('AccountUnbind', [
+                'type' => $this->type,
                 'unid' => intval($unid),
-                'usid' => intval($this->client->getAttr('id')),
-                'type' => $this->type
+                'usid' => intval($this->bind->getAttr('id')),
             ]);
         }
         return $this->get();
@@ -256,7 +273,7 @@ class AccountAccess implements AccountInterface
      */
     public function isBind(): bool
     {
-        return $this->client->isExists() && $this->client->user()->findOrEmpty()->isExists();
+        return $this->user->isExists();
     }
 
     /**
@@ -265,7 +282,7 @@ class AccountAccess implements AccountInterface
      */
     public function isNull(): bool
     {
-        return $this->client->isEmpty();
+        return $this->bind->isEmpty();
     }
 
     /**
@@ -276,11 +293,11 @@ class AccountAccess implements AccountInterface
     {
         try {
             if ($this->isNull()) return [];
-            if ($this->isBind() && ($unid = $this->client->getAttr('unid'))) {
+            if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
                 $map = ['unid' => $unid, 'deleted' => 0];
                 return AccountBind::mk()->where($map)->select()->toArray();
             } else {
-                return [$this->client->refresh()->toArray()];
+                return [$this->bind->refresh()->toArray()];
             }
         } catch (\Exception $exception) {
             return [];
@@ -294,7 +311,7 @@ class AccountAccess implements AccountInterface
      */
     public function delBind(int $usid): array
     {
-        if ($this->isBind() && ($unid = $this->client->getAttr('unid'))) {
+        if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
             $map = ['id' => $usid, 'unid' => $unid];
             AccountBind::mk()->where($map)->update(['unid' => 0]);
         }
@@ -307,11 +324,11 @@ class AccountAccess implements AccountInterface
      */
     public function recode(): array
     {
-        if ($this->client->isEmpty()) return $this->get();
-        if (($user = $this->client->user()->findOrEmpty())->isExists()) {
+        if ($this->bind->isEmpty()) return $this->get();
+        if ($this->user->isExists()) {
             do $check = ['code' => $this->userCode()];
             while (AccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
-            $user->save($check);
+            $this->user->save($check);
         }
         return $this->get();
     }
@@ -323,80 +340,96 @@ class AccountAccess implements AccountInterface
      */
     public function check(): array
     {
-        if ($this->client->isEmpty()) {
+        if ($this->bind->isEmpty()) {
             throw new Exception('需要重新登录！', 401);
         }
-        if ($this->expire > 0 && $this->access->getAttr('time') < time()) {
+        if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
             throw new Exception('登录认证超时！', 403);
         }
         return static::expire()->get();
     }
 
     /**
+     * 获取用户模型
+     * @return AccountUser
+     */
+    public function user(): AccountUser
+    {
+        return $this->user->hidden(['sort', 'password'], true);
+    }
+
+    /**
+     * 获取用户编号
+     * @return string
+     */
+    public function getCode(): string
+    {
+        return $this->user->getAttr('code') ?: '';
+    }
+
+    /**
      * 获取终端类型
      * @return string
      */
-    public function type(): string
+    public function getType(): string
     {
-        if ($this->client->isEmpty()) return '';
-        return $this->client->getAttr('type');
+        return $this->bind->getAttr('type') ?: '';
     }
 
     /**
      * 获取用户编号
      * @return integer
      */
-    public function unid(): int
+    public function getUnid(): int
     {
-        if ($this->client->isEmpty()) return 0;
-        return intval($this->client->getAttr('unid'));
+        return intval($this->bind->getAttr('id'));
     }
 
     /**
      * 获取终端编号
      * @return integer
      */
-    public function usid(): int
+    public function getUsid(): int
     {
-        if ($this->client->isEmpty()) return 0;
-        return intval($this->client->getAttr('id'));
+        return intval($this->bind->getAttr('id'));
     }
 
     /**
      * 生成授权令牌
+     * @param bool $expire
      * @return AccountInterface
      */
-    public function token(): AccountInterface
+    public function token(bool $expire = true): AccountInterface
     {
-        // 十分之一概率清理令牌
-        if (mt_rand(1, 100) < 10) {
+        // 百分之一概率清理令牌
+        if (mt_rand(1, 1000) < 10) {
             AccountAuth::mk()->whereBetween('time', [1, time()])->delete();
         }
-        $usid = $this->client->getAttr('id');
+        $usid = $this->bind->getAttr('id');
         // 查询该通道历史授权记录
-        if ($this->access->isEmpty()) {
+        if ($this->auth->isEmpty()) {
             $where = ['usid' => $usid, 'type' => $this->type];
-            $this->access = AccountAuth::mk()->where($where)->findOrEmpty();
+            $this->auth = AccountAuth::mk()->where($where)->findOrEmpty();
         }
         // 生成新令牌数据
-        if ($this->access->isEmpty()) {
+        if ($this->auth->isEmpty()) {
             do $check = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
             while (AccountAuth::mk()->master()->where($check)->findOrEmpty()->isExists());
-            $this->access->save($check + ['usid' => $usid]);
+            $time = $this->expire > 0 ? $this->expire + time() : 0;
+            $this->auth->save($check + ['usid' => $usid, 'time' => $time]);
         }
-        return $this->expire();
+        return $expire ? $this->expire() : $this;
     }
 
     /**
      * 延期令牌时间
      * @return AccountInterface
+     * @throws Exception
      */
     public function expire(): AccountInterface
     {
-        $time = $this->expire > 0 ? $this->expire + time() : 0;
-        $this->access->isExists() && $this->access->save([
-            'type' => $this->type, 'time' => $time
-        ]);
+        if ($this->auth->isEmpty()) throw new Exception('无授权记录！');
+        $this->auth->save(['time' => $this->expire > 0 ? $this->expire + time() : 0]);
         return $this;
     }
 
@@ -409,19 +442,19 @@ class AccountAccess implements AccountInterface
     private function save(array $data): AccountBind
     {
         if (empty($data)) throw new Exception('资料不能为空！');
-        $data['extra'] = array_merge($this->client->getAttr('extra'), $data['extra'] ?? []);
+        $data['extra'] = array_merge($this->bind->getAttr('extra'), $data['extra'] ?? []);
         // 写入默认头像内容
-        if (empty($data['headimg']) && empty($this->client->getAttr('headimg'))) {
+        if (empty($data['headimg']) && empty($this->bind->getAttr('headimg'))) {
             $data['headimg'] = Account::headimg();
         }
         // 自动生成账号昵称
-        if (empty($data['nickname']) && $this->client->getAttr('nickname')) {
+        if (empty($data['nickname']) && $this->bind->getAttr('nickname')) {
             $name = Account::get($this->type)['name'] ?? $this->type;
-            $data['nickname'] = "{$name}{$this->client->getAttr('id')}";
+            $data['nickname'] = "{$name}{$this->bind->getAttr('id')}";
         }
         // 更新写入终端账号
-        if ($this->client->save($data) && $this->client->isExists()) {
-            return $this->client->refresh();
+        if ($this->bind->save($data) && $this->bind->isExists()) {
+            return $this->bind->refresh();
         } else {
             throw new Exception('资料保存失败！');
         }

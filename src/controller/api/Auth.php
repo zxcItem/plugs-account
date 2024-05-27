@@ -57,9 +57,11 @@ abstract class Auth extends Controller
             $this->unid = intval($login['unid'] ?? 0);
             $this->type = strval($login['type'] ?? '');
             // 临时缓存登录数据
+            sysvar('account_object', $this->account);
             sysvar('account_user_type', $this->type);
             sysvar('account_user_usid', $this->usid);
             sysvar('account_user_unid', $this->unid);
+            sysvar('account_user_code', $this->account->getCode());
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
