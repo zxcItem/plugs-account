@@ -26,7 +26,7 @@ abstract class Account
 
     // 已禁用的账号通道
     private static $denys = null;
-    private static $cacheKey = 'account.denys';
+    private static $cacheKey = 'plugin.account.denys';
 
     private static $types = [
         self::WAP     => ['name' => '手机浏览器', 'field' => 'phone', 'status' => 1],
@@ -177,11 +177,11 @@ abstract class Account
      */
     public static function expire($expire = null, string $headimg = null): int
     {
-        $data = sysdata('account.access');
+        $data = sysdata('plugin.account.access');
         if (!is_null($expire) || !is_null($headimg)) {
             if (!is_null($expire)) $data['expire'] = $expire;
             if (!is_null($headimg)) $data['headimg'] = $headimg;
-            $data = sysdata('account.access', $data);
+            $data = sysdata('plugin.account.access', $data);
         }
         return intval($data['expire'] ?? 0);
     }
@@ -208,13 +208,32 @@ abstract class Account
     }
 
     /**
+     * 账号配置参数设置与读取
+     * @param null|array|string $data
+     * @return mixed|void|null
+     * @throws Exception
+     */
+    public static function config($data = null)
+    {
+        if (is_null($data)) {
+            return sysdata('plugin.account.access');
+        } elseif (is_array($data)) {
+            return sysdata('plugin.account.access', $data);
+        } elseif (is_string($data)) {
+            return sysdata('plugin.account.access')[$data] ?? null;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * 是否自动注册
      * @return boolean
      * @throws Exception
      */
     public static function enableAutoReigster(): bool
     {
-        return empty(sysdata('plugin.account.access')['disRegister']);
+        return empty(self::config('disRegister'));
     }
 
     /**
@@ -225,10 +244,10 @@ abstract class Account
      */
     public static function headimg(string $headimg = null): string
     {
-        $data = sysdata('account.access');
+        $data = sysdata('plugin.account.access');
         if (!is_null($headimg)) {
             $data['headimg'] = $headimg;
-            sysdata('account.access', $data);
+            sysdata('plugin.account.access', $data);
         }
         return $data['headimg'] ?? 'https://thinkadmin.top/static/img/logo.png';
     }

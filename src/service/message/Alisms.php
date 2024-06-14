@@ -62,7 +62,7 @@ class Alisms implements MessageInterface
      */
     public function init(array $config = []): MessageInterface
     {
-        $options = array_merge(sysdata('account.smscfg'), $config);
+        $options = array_merge(sysdata('plugin.account.smscfg'), $config);
         $this->keyid = $options['alisms_keyid'] ?? '';
         $this->secret = $options['alisms_secret'] ?? '';
         $this->signtx = $options['alisms_signtx'] ?? '';

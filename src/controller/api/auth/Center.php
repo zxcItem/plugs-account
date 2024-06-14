@@ -26,6 +26,7 @@ class Center extends Auth
         $this->success('获取资料成功！', $this->account->get());
     }
 
+
     /**
      * 修改帐号信息
      * @return void
