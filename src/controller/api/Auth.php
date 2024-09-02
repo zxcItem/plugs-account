@@ -5,7 +5,6 @@ declare (strict_types=1);
 namespace plugin\account\controller\api;
 
 use plugin\account\service\Account;
-use plugin\account\service\contract\AccountInterface;
 use think\admin\Controller;
 use think\exception\HttpResponseException;
 
@@ -37,7 +36,7 @@ abstract class Auth extends Controller
 
     /**
      * 终端账号接口
-     * @var AccountInterface
+     * @var \plugin\account\service\contract\AccountInterface
      */
     protected $account;
 
@@ -48,8 +47,15 @@ abstract class Auth extends Controller
     {
         try {
             // 获取请求令牌内容
-            $token = $this->request->header('api-token', '');
-            if (empty($token)) $this->error('需要登录授权！', [], 401);
+            // 优先识别 Bearer Token 机制，再识别 api-token 字段
+            $token = $this->request->header('Authorization', '');
+            if (!empty($token) && stripos($token, 'Bearer ') === 0) {
+                $token = substr($token, 7);
+            }
+            if (empty($token)) {
+                $token = $this->request->header('api-token', '');
+            }
+            if (empty($token)) $this->error('需要登录授权', [], 401);
             // 读取用户账号数据
             $this->account = Account::mk('', $token);
             $login = $this->account->check();
@@ -57,11 +63,11 @@ abstract class Auth extends Controller
             $this->unid = intval($login['unid'] ?? 0);
             $this->type = strval($login['type'] ?? '');
             // 临时缓存登录数据
-            sysvar('account_object', $this->account);
-            sysvar('account_user_type', $this->type);
-            sysvar('account_user_usid', $this->usid);
-            sysvar('account_user_unid', $this->unid);
-            sysvar('account_user_code', $this->account->getCode());
+            sysvar('plugin_account_object', $this->account);
+            sysvar('plugin_account_user_type', $this->type);
+            sysvar('plugin_account_user_usid', $this->usid);
+            sysvar('plugin_account_user_unid', $this->unid);
+            sysvar('plugin_account_user_code', $this->account->getCode());
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
@@ -78,13 +84,13 @@ abstract class Auth extends Controller
     {
         $login = $this->account->get();
         if (empty($login['status'])) {
-            $this->error('终端已冻结！', $login, 403);
+            $this->error('终端已冻结', $login, 403);
         } elseif ($isBind) {
             if (empty($login['user'])) {
-                $this->error('请完善资料！', $login, 402);
+                $this->error('请绑定账号', $login, 402);
             }
             if (empty($login['user']['status'])) {
-                $this->error('账号已冻结！', $login, 403);
+                $this->error('账号已冻结', $login, 403);
             }
         }
         return $this;

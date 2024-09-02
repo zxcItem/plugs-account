@@ -1,5 +1,18 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
 
 declare (strict_types=1);
 
@@ -9,11 +22,7 @@ use plugin\account\model\AccountMsms;
 use plugin\account\service\Message as MessageService;
 use plugin\account\service\message\Alisms;
 use think\admin\Controller;
-use think\admin\Exception;
 use think\admin\helper\QueryHelper;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 
 /**
  * 手机短信管理
@@ -36,7 +45,7 @@ class Message extends Controller
     protected function initialize()
     {
         parent::initialize();
-        $this->smskey = 'account.smscfg';
+        $this->smskey = 'plugin.account.smscfg';
     }
 
     /**
@@ -44,9 +53,9 @@ class Message extends Controller
      * @auth true
      * @menu true
      * @return void
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
     public function index()
     {
@@ -62,7 +71,7 @@ class Message extends Controller
      * 修改短信配置
      * @auth true
      * @return void
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function config()
     {

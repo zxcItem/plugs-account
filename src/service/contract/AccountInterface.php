@@ -1,13 +1,24 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
 
 declare (strict_types=1);
 
 namespace plugin\account\service\contract;
 
-use plugin\account\model\AccountUser;
-use think\admin\Exception;
-use think\db\exception\DbException;
+use plugin\account\model\PluginAccountUser;
 
 /**
  * 用户账号接口类
@@ -19,7 +30,7 @@ interface AccountInterface
     /**
      * 读取子账号资料
      * @param boolean $rejwt
-     * @param bool $refresh
+     * @param boolean $refresh
      * @return array
      */
     public function get(bool $rejwt = false, bool $refresh = false): array;
@@ -42,16 +53,15 @@ interface AccountInterface
 
     /**
      * 获取用户模型
-     * @return AccountUser
+     * @return PluginAccountUser
      */
-    public function user(): AccountUser;
+    public function user(): PluginAccountUser;
 
     /**
      * 获取用户编号
      * @return string
      */
     public function getCode(): string;
-
 
     /**
      * 获取终端类型
@@ -119,8 +129,8 @@ interface AccountInterface
 
     /**
      * 修改终端密码
-     * @param string $pass
-     * @param bool $event
+     * @param string $pass 待修改密码
+     * @param boolean $event 触发事件
      * @return boolean
      */
     public function pwdModify(string $pass, bool $event = true): bool;
@@ -134,20 +144,20 @@ interface AccountInterface
     /**
      * 检查是否有效
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function check(): array;
 
     /**
      * 生成授权令牌
-     * @return AccountInterface
-     * @throws DbException
+     * @return \plugin\account\service\contract\AccountInterface
+     * @throws \think\db\exception\DbException
      */
     public function token(): AccountInterface;
 
     /**
      * 延期令牌时间
-     * @return AccountInterface
+     * @return \plugin\account\service\contract\AccountInterface
      */
     public function expire(): AccountInterface;
 }

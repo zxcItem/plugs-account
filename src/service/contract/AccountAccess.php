@@ -1,13 +1,26 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
 
 declare (strict_types=1);
 
 namespace plugin\account\service\contract;
 
-use plugin\account\model\AccountAuth;
-use plugin\account\model\AccountBind;
-use plugin\account\model\AccountUser;
+use plugin\account\model\PluginAccountAuth;
+use plugin\account\model\PluginAccountBind;
+use plugin\account\model\PluginAccountUser;
 use plugin\account\service\Account;
 use think\admin\Exception;
 use think\admin\extend\CodeExtend;
@@ -23,25 +36,25 @@ class AccountAccess implements AccountInterface
 {
     /**
      * 当前应用实例
-     * @var App
+     * @var \think\App
      */
     protected $app;
 
     /**
      * 当前用户对象
-     * @var AccountUser
+     * @var PluginAccountUser
      */
     protected $user;
 
     /**
      * 当前认证对象
-     * @var AccountAuth
+     * @var PluginAccountAuth
      */
     protected $auth;
 
     /**
      * 当前终端对象
-     * @var AccountBind
+     * @var PluginAccountBind
      */
     protected $bind;
 
@@ -78,10 +91,10 @@ class AccountAccess implements AccountInterface
 
     /**
      * 通道构造方法
-     * @param App $app
+     * @param \think\App $app
      * @param string $type 通道类型
      * @param string $field 授权字段
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function __construct(App $app, string $type, string $field)
     {
@@ -96,22 +109,24 @@ class AccountAccess implements AccountInterface
      * @param string|array $token 令牌或条件
      * @param boolean $isjwt 是否返回令牌
      * @return AccountInterface
+     * @throws \think\admin\Exception
      */
     public function init($token = '', bool $isjwt = true): AccountInterface
     {
         $this->isjwt = $isjwt;
-        $this->auth = AccountAuth::mk();
-        $this->bind = AccountBind::mk();
-        $this->user = AccountUser::mk();
+        $this->auth = PluginAccountAuth::mk();
+        $this->bind = PluginAccountBind::mk();
+        $this->user = PluginAccountUser::mk();
         if (is_string($token)) {
             $map = ['type' => $this->type, 'token' => $token];
-            $this->auth = AccountAuth::mk()->where($map)->findOrEmpty();
+            $this->auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
             $this->bind = $this->auth->client()->findOrEmpty();
             $this->user = $this->bind->user()->findOrEmpty();
         } elseif (is_array($token)) {
+            // 返向查询终端账号
             $map = ['deleted' => 0];
             if ($this->type) $map['type'] = $this->type;
-            $this->bind = AccountBind::mk()->where($map)->where($token)->findOrEmpty();
+            $this->bind = PluginAccountBind::mk()->where($map)->where($token)->findOrEmpty();
             $this->user = $this->bind->user()->findOrEmpty();
             if ($this->bind->isExists()) {
                 if (empty($this->type)) $this->type = $this->bind->getAttr('type');
@@ -126,7 +141,7 @@ class AccountAccess implements AccountInterface
      * @param array $data 用户资料
      * @param boolean $rejwt 返回令牌
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function set(array $data = [], bool $rejwt = false): array
     {
@@ -139,7 +154,7 @@ class AccountAccess implements AccountInterface
             } else {
                 $map = [$this->field => $data[$this->field]];
                 if ($this->type) $map['type'] = $this->type;
-                $this->bind = AccountBind::mk()->where($map)->findOrEmpty();
+                $this->bind = PluginAccountBind::mk()->where($map)->findOrEmpty();
             }
         } elseif ($this->bind->isEmpty()) {
             throw new Exception("字段 {$this->field} 为空！");
@@ -152,7 +167,7 @@ class AccountAccess implements AccountInterface
     /**
      * 获取用户数据
      * @param boolean $rejwt 返回令牌
-     * @param bool $refresh 刷新数据
+     * @param boolean $refresh 刷新数据
      * @return array
      */
     public function get(bool $rejwt = false, bool $refresh = false): array
@@ -175,10 +190,11 @@ class AccountAccess implements AccountInterface
      * 验证终端密码
      * @param string $pass 待验证密码
      * @return boolean
+     * @throws \think\admin\Exception
      */
     public function pwdVerify(string $pass): bool
     {
-        $pass = md5("Think{$pass}Admin");
+        $pass = md5($pass);
         if ($this->user->getAttr('password') === $pass) return !!$this->expire();
         return $this->bind->getAttr('password') === $pass && $this->expire();
     }
@@ -186,13 +202,13 @@ class AccountAccess implements AccountInterface
     /**
      * 修改终端密码
      * @param string $pass 待修改密码
-     * @param bool $event 触发事件
+     * @param boolean $event 触发事件
      * @return boolean
      */
     public function pwdModify(string $pass, bool $event = true): bool
     {
         if ($this->bind->isEmpty()) return false;
-        $data = ['password' => md5("Think{$pass}Admin")];
+        $data = ['password' => md5($pass)];
         $this->user->isExists() && $this->user->save($data);
         if (!$this->bind->save($data)) return false;
         if ($event) $this->app->event->trigger('PluginAccountChangePassword', [
@@ -206,17 +222,17 @@ class AccountAccess implements AccountInterface
      * @param array $map 主账号条件
      * @param array $data 主账号资料
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function bind(array $map, array $data = []): array
     {
         if ($this->bind->isEmpty()) throw new Exception('终端账号异常！');
-        $this->user = AccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
+        $this->user = PluginAccountUser::mk()->where(['deleted' => 0])->where($map)->findOrEmpty();
         if (!empty($data['extra'])) $this->user->setAttr('extra', array_merge($this->user->getAttr('extra'), $data['extra']));
         unset($data['id'], $data['code'], $data['extra']);
         // 生成新的用户编号
         if ($this->user->isEmpty()) do $check = ['code' => $data['code'] = $this->userCode()];
-        while (AccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
+        while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
         // 自动绑定默认头像
         if (empty($data['headimg']) && $this->user->isEmpty() || empty($this->user->getAttr('headimg'))) {
             if (empty($data['headimg'] = $this->bind->getAttr('headimg'))) $data['headimg'] = Account::headimg();
@@ -239,7 +255,7 @@ class AccountAccess implements AccountInterface
         // 保存更新用户数据
         if ($this->user->save($data + $map)) {
             $this->bind->save(['unid' => $this->user['id']]);
-            $this->app->event->trigger('AccountBind', [
+            $this->app->event->trigger('PluginAccountBind', [
                 'type' => $this->type,
                 'unid' => intval($this->user->getAttr('id')),
                 'usid' => intval($this->bind->getAttr('id')),
@@ -253,7 +269,7 @@ class AccountAccess implements AccountInterface
     /**
      * 解绑主账号
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function unBind(): array
     {
@@ -262,7 +278,7 @@ class AccountAccess implements AccountInterface
         }
         if (($unid = $this->bind->getAttr('unid')) > 0) {
             $this->bind->save(['unid' => 0]);
-            $this->app->event->trigger('AccountUnbind', [
+            $this->app->event->trigger('PluginAccountUnbind', [
                 'type' => $this->type,
                 'unid' => intval($unid),
                 'usid' => intval($this->bind->getAttr('id')),
@@ -299,7 +315,7 @@ class AccountAccess implements AccountInterface
             if ($this->isNull()) return [];
             if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
                 $map = ['unid' => $unid, 'deleted' => 0];
-                return AccountBind::mk()->where($map)->select()->toArray();
+                return PluginAccountBind::mk()->where($map)->select()->toArray();
             } else {
                 return [$this->bind->refresh()->toArray()];
             }
@@ -317,7 +333,7 @@ class AccountAccess implements AccountInterface
     {
         if ($this->isBind() && ($unid = $this->bind->getAttr('unid'))) {
             $map = ['id' => $usid, 'unid' => $unid];
-            AccountBind::mk()->where($map)->update(['unid' => 0]);
+            PluginAccountBind::mk()->where($map)->update(['unid' => 0]);
         }
         return $this->allBind();
     }
@@ -331,7 +347,7 @@ class AccountAccess implements AccountInterface
         if ($this->bind->isEmpty()) return $this->get();
         if ($this->user->isExists()) {
             do $check = ['code' => $this->userCode()];
-            while (AccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
+            while (PluginAccountUser::mk()->master()->where($check)->findOrEmpty()->isExists());
             $this->user->save($check);
         }
         return $this->get();
@@ -340,24 +356,24 @@ class AccountAccess implements AccountInterface
     /**
      * 检查是否有效
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function check(): array
     {
         if ($this->bind->isEmpty()) {
-            throw new Exception('需要重新登录！', 401);
+            throw new Exception('请重新登录！', 401);
         }
         if ($this->expire > 0 && $this->auth->getAttr('time') < time()) {
-            throw new Exception('登录认证超时！', 403);
+            throw new Exception('登录已超时！', 403);
         }
         return static::expire()->get();
     }
 
     /**
      * 获取用户模型
-     * @return AccountUser
+     * @return PluginAccountUser
      */
-    public function user(): AccountUser
+    public function user(): PluginAccountUser
     {
         return $this->user->hidden(['sort', 'password'], true);
     }
@@ -386,7 +402,7 @@ class AccountAccess implements AccountInterface
      */
     public function getUnid(): int
     {
-        return intval($this->bind->getAttr('id'));
+        return intval($this->bind->getAttr('unid'));
     }
 
     /**
@@ -400,25 +416,26 @@ class AccountAccess implements AccountInterface
 
     /**
      * 生成授权令牌
-     * @param bool $expire
+     * @param boolean $expire
      * @return AccountInterface
+     * @throws \think\admin\Exception
      */
     public function token(bool $expire = true): AccountInterface
     {
         // 百分之一概率清理令牌
         if (mt_rand(1, 1000) < 10) {
-            AccountAuth::mk()->whereBetween('time', [1, time()])->delete();
+            PluginAccountAuth::mk()->whereBetween('time', [1, time()])->delete();
         }
         $usid = $this->bind->getAttr('id');
         // 查询该通道历史授权记录
         if ($this->auth->isEmpty()) {
             $where = ['usid' => $usid, 'type' => $this->type];
-            $this->auth = AccountAuth::mk()->where($where)->findOrEmpty();
+            $this->auth = PluginAccountAuth::mk()->where($where)->findOrEmpty();
         }
         // 生成新令牌数据
         if ($this->auth->isEmpty()) {
             do $check = ['type' => $this->type, 'token' => md5(uniqid(strval(rand(0, 999))))];
-            while (AccountAuth::mk()->master()->where($check)->findOrEmpty()->isExists());
+            while (PluginAccountAuth::mk()->master()->where($check)->findOrEmpty()->isExists());
             $time = $this->expire > 0 ? $this->expire + time() : 0;
             $this->auth->save($check + ['usid' => $usid, 'time' => $time]);
         }
@@ -428,7 +445,7 @@ class AccountAccess implements AccountInterface
     /**
      * 延期令牌时间
      * @return AccountInterface
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function expire(): AccountInterface
     {
@@ -440,10 +457,10 @@ class AccountAccess implements AccountInterface
     /**
      * 更新用户资料
      * @param array $data
-     * @return AccountBind
-     * @throws Exception
+     * @return PluginAccountBind
+     * @throws \think\admin\Exception
      */
-    private function save(array $data): AccountBind
+    private function save(array $data): PluginAccountBind
     {
         if (empty($data)) throw new Exception('资料不能为空！');
         $data['extra'] = array_merge($this->bind->getAttr('extra'), $data['extra'] ?? []);
@@ -465,7 +482,7 @@ class AccountAccess implements AccountInterface
     }
 
     /**
-     * 生成用户随机编号
+     * 生成用户编号
      * @return string
      */
     private function userCode(): string

@@ -1,11 +1,24 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
 
 declare (strict_types=1);
 
 namespace plugin\account\service\contract;
 
-use plugin\account\model\AccountMsms;
+use plugin\account\model\PluginAccountMsms;
 use think\admin\Exception;
 
 /**
@@ -37,7 +50,7 @@ trait MessageUsageTrait
      * @param array $params 模板变量
      * @param array $options 其他配置
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function verify(string $scene, string $phone, array $params = [], array $options = []): array
     {
@@ -46,9 +59,9 @@ trait MessageUsageTrait
             throw new Exception('业务场景未配置！');
         }
         $result = $this->send($scenes[strtolower($scene)], $phone, $params, $options);
-        AccountMsms::mk()->save([
-            'unid'   => intval(sysvar('account_user_unid')),
-            'usid'   => intval(sysvar('account_user_usid')),
+        PluginAccountMsms::mk()->save([
+            'unid'   => intval(sysvar('plugin_account_user_unid')),
+            'usid'   => intval(sysvar('plugin_account_user_usid')),
             'type'   => class_basename(static::class),
             'smsid'  => $result['smsid'] ?? '',
             'scene'  => $scene,

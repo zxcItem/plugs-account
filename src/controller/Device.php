@@ -7,16 +7,12 @@ namespace plugin\account\controller;
 use plugin\account\model\AccountBind;
 use plugin\account\service\Account;
 use think\admin\Controller;
-use think\admin\Exception;
 use think\admin\helper\QueryHelper;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 
 /**
  * 终端账号管理
  * @class Device
- * @package plugin\account\controller
+ * @package plugin\account\controller\user
  */
 class Device extends Controller
 {
@@ -24,9 +20,9 @@ class Device extends Controller
      * 终端账号管理
      * @auth true
      * @menu true
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
     public function index()
     {
@@ -44,7 +40,7 @@ class Device extends Controller
      * 账号接口配置
      * @auth true
      * @return void
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function config()
     {

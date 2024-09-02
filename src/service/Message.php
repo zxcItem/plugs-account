@@ -1,5 +1,19 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
+
 declare (strict_types=1);
 
 namespace plugin\account\service;
@@ -36,7 +50,7 @@ abstract class Message
      * @param array $config
      * @param ?string $driver
      * @return MessageInterface
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function mk(array $config = [], ?string $driver = null): MessageInterface
     {
@@ -71,6 +85,7 @@ abstract class Message
             self::mk()->verify($scene, $phone, ['code' => $code]);
             return [1, '验证码发送成功', ['time' => ($time + $wait < time()) ? 0 : ($wait - time() + $time)]];
         } catch (\Exception $ex) {
+            trace_file($ex);
             isset($ckey) && Library::$sapp->cache->delete($ckey);
             return [0, $ex->getMessage(), []];
         }
@@ -82,13 +97,13 @@ abstract class Message
      * @param string $phone 手机号码
      * @param string $scene 业务场景
      * @return boolean
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function checkVerifyCode(string $vcode, string $phone, string $scene = self::tLogin): bool
     {
-//        if (stripos(Library::$sapp->request->domain(), '.thinkadmin.top') !== false) {
+        if (stripos(Library::$sapp->request->domain(), '.thinkadmin.top') !== false) {
             if ($vcode === '123456') return true;
-//        }
+        }
         $cache = Library::$sapp->cache->get(static::genCacheKey($phone, $scene), []);
         return is_array($cache) && isset($cache['code']) && $cache['code'] == $vcode;
     }
@@ -113,7 +128,7 @@ abstract class Message
      * @param string $phone 手机号码
      * @param string $scene 业务场景
      * @return string
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     private static function genCacheKey(string $phone, string $scene = self::tLogin): string
     {
@@ -129,7 +144,7 @@ abstract class Message
      * @param string $name
      * @param array $arguments
      * @return mixed
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function __callStatic(string $name, array $arguments)
     {

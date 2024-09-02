@@ -1,10 +1,24 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
+
 declare (strict_types=1);
 
 namespace plugin\account\service;
 
-use plugin\account\model\AccountAuth;
+use plugin\account\model\PluginAccountAuth;
 use plugin\account\service\contract\AccountAccess;
 use plugin\account\service\contract\AccountInterface;
 use think\admin\Exception;
@@ -17,12 +31,12 @@ use think\admin\extend\JwtExtend;
  */
 abstract class Account
 {
-    const WAP = 'wap';
-    const WEB = 'web';
-    const WXAPP = 'wxapp';
-    const WECHAT = 'wechat';
-    const IOSAPP = 'iosapp';
-    const ANDROID = 'android';
+    public const WAP = 'wap';
+    public const WEB = 'web';
+    public const WXAPP = 'wxapp';
+    public const WECHAT = 'wechat';
+    public const IOSAPP = 'iosapp';
+    public const ANDROID = 'android';
 
     // 已禁用的账号通道
     private static $denys = null;
@@ -43,13 +57,13 @@ abstract class Account
      * @param string|array $token 令牌或条件
      * @param boolean $isjwt 是否JWT模式
      * @return AccountInterface
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function mk(string $type, $token = '', bool $isjwt = true): AccountInterface
     {
         if ($token === AccountAccess::tester) {
             if (empty($type)) {
-                $type = AccountAuth::mk()->where(['token' => $token])->value('type');
+                $type = PluginAccountAuth::mk()->where(['token' => $token])->value('type');
                 if (empty($type)) throw new Exception('账号不存在！');
             }
         } elseif ($isjwt && is_string($token) && strlen($token) > 32) {
@@ -142,7 +156,7 @@ abstract class Account
     /**
      * 保存用户通道状态
      * @return mixed
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function save()
     {
@@ -173,7 +187,7 @@ abstract class Account
      * @param string|integer|null $expire 有效时间
      * @param string|null $headimg 默认头像
      * @return integer
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function expire($expire = null, string $headimg = null): int
     {
@@ -191,14 +205,14 @@ abstract class Account
      * @param string $token
      * @param ?string $type
      * @return AccountInterface
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function token(string $token = '', ?string &$type = null): AccountInterface
     {
         if ($token === AccountAccess::tester) {
             $map = ['token' => $token];
             empty($type) || ($map['type'] = $type);
-            $auth = AccountAuth::mk()->where($map)->findOrEmpty();
+            $auth = PluginAccountAuth::mk()->where($map)->findOrEmpty();
             if ($auth->isEmpty()) throw new Exception('账号不存在！');
             return static::mk($type = $auth->getAttr('type'), $auth->getAttr('token'));
         } else {
@@ -211,7 +225,7 @@ abstract class Account
      * 账号配置参数设置与读取
      * @param null|array|string $data
      * @return mixed|void|null
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function config($data = null)
     {
@@ -229,7 +243,7 @@ abstract class Account
     /**
      * 是否自动注册
      * @return boolean
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function enableAutoReigster(): bool
     {
@@ -240,7 +254,7 @@ abstract class Account
      * 获取默认头像
      * @param string|null $headimg
      * @return string
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public static function headimg(string $headimg = null): string
     {

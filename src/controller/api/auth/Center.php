@@ -5,6 +5,8 @@ declare (strict_types=1);
 namespace plugin\account\controller\api\auth;
 
 use plugin\account\controller\api\Auth;
+use plugin\account\model\AccountAuth;
+use plugin\account\model\AccountBind;
 use plugin\account\service\Message;
 use think\admin\service\RuntimeService;
 use think\admin\Storage;
@@ -23,9 +25,8 @@ class Center extends Auth
      */
     public function get()
     {
-        $this->success('获取资料成功！', $this->account->get());
+        $this->success('获取资料', $this->account->get());
     }
-
 
     /**
      * 修改帐号信息
@@ -52,12 +53,34 @@ class Center extends Auth
                 unset($data['password']);
             }
             foreach ($data as $k => $v) if ($v === '') unset($data[$k]);
-            if (empty($data)) $this->success('无需修改！', $this->account->get());
-            $this->success('修改成功！', $this->account->bind(['id' => $this->unid], $data));
+            if (empty($data)) $this->success('无需修改', $this->account->get());
+            $this->success('修改成功', $this->account->bind(['id' => $this->unid], $data));
         } catch (HttpResponseException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
+        }
+    }
+
+    /**
+     * 注销当前账号
+     * @return void
+     */
+    public function forbid()
+    {
+        if (($user = $this->account->user())->isExists()) try {
+            $this->app->db->transaction(function () use ($user) {
+                $user->save(['deleted' => 1, 'remark' => '用户主动申请注销账号！']);
+                AccountAuth::mk()->where(['usid' => $this->usid])->delete();
+                AccountBind::mk()->where(['unid' => $this->unid])->delete();
+            });
+            $this->success('账号注销成功！');
+        } catch (HttpResponseException $exception) {
+            throw $exception;
+        } catch (\Exception $exception) {
+            $this->error($exception->getMessage());
+        } else {
+            $this->error('未完成注册！');
         }
     }
 
@@ -69,9 +92,9 @@ class Center extends Auth
     {
         try {
             $data = $this->_vali([
-                'phone.mobile'   => '手机号错误！',
-                'phone.require'  => '手机号为空！',
-                'verify.require' => '验证码为空！',
+                'phone.mobile'   => '手机号错误',
+                'phone.require'  => '手机号为空',
+                'verify.require' => '验证码为空',
                 'passwd.default' => ''
             ]);
             if (Message::checkVerifyCode($data['verify'], $data['phone'])) {
@@ -90,7 +113,7 @@ class Center extends Auth
                 }
                 $this->success('关联成功!', $this->account->get(true));
             } else {
-                $this->error('短信验证失败！');
+                $this->error('验证失败');
             }
         } catch (HttpResponseException $exception) {
             throw $exception;
@@ -106,6 +129,6 @@ class Center extends Auth
     public function unbind()
     {
         $this->account->unBind();
-        $this->success('解除关联成功！', $this->account->get());
+        $this->success('关联成功', $this->account->get());
     }
 }

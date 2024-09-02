@@ -8,14 +8,11 @@ namespace plugin\account\controller;
 use plugin\account\model\AccountUser;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 
 /**
  * 用户账号管理
  * @class Master
- * @package plugin\account\controller
+ * @package plugin\account\controller\user
  */
 class Master extends Controller
 {
@@ -23,9 +20,9 @@ class Master extends Controller
      * 用户账号管理
      * @auth true
      * @menu true
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
      */
     public function index()
     {

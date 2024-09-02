@@ -1,13 +1,24 @@
 <?php
 
+// +----------------------------------------------------------------------
+// | Account Plugin for ThinkAdmin
+// +----------------------------------------------------------------------
+// | 版权所有 2022~2024 ThinkAdmin [ thinkadmin.top ]
+// +----------------------------------------------------------------------
+// | 官方网站: https://thinkadmin.top
+// +----------------------------------------------------------------------
+// | 免责声明 ( https://thinkadmin.top/disclaimer )
+// | 会员免费 ( https://thinkadmin.top/vip-introduce )
+// +----------------------------------------------------------------------
+// | gitee 代码仓库：https://gitee.com/zoujingli/think-plugs-account
+// | github 代码仓库：https://github.com/zoujingli/think-plugs-account
+// +----------------------------------------------------------------------
 
 declare (strict_types=1);
 
 namespace plugin\account\service;
 
 namespace plugin\account\service\contract;
-
-use think\admin\Exception;
 
 /**
  * 通用短信接口类
@@ -19,7 +30,7 @@ interface MessageInterface
     /**
      * 初始化短信通道
      * @return static
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function init(array $config = []): MessageInterface;
 
@@ -30,7 +41,7 @@ interface MessageInterface
      * @param array $params 短信模板变量
      * @param array $options 其他配置参数
      * @return array
-     * @throws Exception
+     * @throws \think\admin\Exception
      */
     public function send(string $code, string $phone, array $params = [], array $options = []): array;
 

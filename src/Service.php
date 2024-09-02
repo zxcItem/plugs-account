@@ -32,11 +32,7 @@ class Service extends Plugin
      */
     public function register(): void
     {
-        // 注册用户绑定事件
-        $this->app->event->listen('AccountBind', function (array $data) {
-            $this->app->log->notice("Event AccountBind {$data['unid']}#{$data['usid']}");
-            AccountRelation::sync(intval($data['unid']));
-        });
+
     }
 
     /**
@@ -56,7 +52,6 @@ class Service extends Plugin
                     ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$code}/device/index"],
                     ['name' => '用户短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$code}/message/index"],
                     ['name' => '用户附件管理', 'icon' => 'layui-icon layui-icon-file', 'node' => "{$code}/file/index"],
-                    ['name' => '用户关系管理', 'icon' => 'layui-icon layui-icon-file', 'node' => "{$code}/relation/index"],
                 ],
             ],
         ];
