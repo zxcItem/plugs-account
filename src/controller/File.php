@@ -2,8 +2,8 @@
 
 namespace plugin\account\controller;
 
-use plugin\account\model\AccountFile;
-use plugin\account\model\AccountUser;
+use plugin\account\model\PluginAccountFile;
+use plugin\account\model\PluginAccountUser;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 use think\admin\Storage;
@@ -43,12 +43,12 @@ class File extends Controller
      */
     public function index()
     {
-        AccountFile::mQuery()->layTable(function () {
+        PluginAccountFile::mQuery()->layTable(function () {
             $this->title = '用户附件管理';
-            $this->xexts = AccountFile::mk()->distinct()->column('xext');
+            $this->xexts = PluginAccountFile::mk()->distinct()->column('xext');
         }, static function (QueryHelper $query) {
             $query->with(['user'])->like('name,xext')->equal('type')->dateBetween('create_time');
-            $db = AccountUser::mQuery()->like('email|nickname|username|phone#user')->db();
+            $db = PluginAccountUser::mQuery()->like('email|nickname|username|phone#user')->db();
             if ($db->getOptions('where')) $query->whereRaw("unid in {$db->field('id')->buildSql()}");
         });
     }
@@ -72,7 +72,7 @@ class File extends Controller
      */
     public function edit()
     {
-        AccountFile::mForm('form');
+        PluginAccountFile::mForm('form');
     }
 
     /**
@@ -82,6 +82,6 @@ class File extends Controller
      */
     public function remove()
     {
-        AccountFile::mDelete();
+        PluginAccountFile::mDelete();
     }
 }

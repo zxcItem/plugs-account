@@ -9,10 +9,10 @@ use think\model\relation\HasOne;
 
 /**
  * 用户附件管理
- * @class AccountFile
+ * @class PluginAccountFile
  * @package plugin\account\model
  */
-class AccountFile extends Abs
+class PluginAccountFile extends Abs
 {
     /**
      * 关联用户数据
@@ -20,6 +20,6 @@ class AccountFile extends Abs
      */
     public function user(): HasOne
     {
-        return $this->hasOne(AccountUser::class, 'id', 'unid')->bind(['nickname']);
+        return $this->hasOne(PluginAccountUser::class, 'id', 'unid')->bind(['nickname']);
     }
 }

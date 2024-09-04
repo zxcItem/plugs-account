@@ -4,7 +4,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller;
 
-use plugin\account\model\AccountBind;
+use plugin\account\model\PluginAccountBind;
 use plugin\account\service\Account;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
@@ -12,7 +12,7 @@ use think\admin\helper\QueryHelper;
 /**
  * 终端账号管理
  * @class Device
- * @package plugin\account\controller\user
+ * @package plugin\account\controller\Device
  */
 class Device extends Controller
 {
@@ -27,7 +27,7 @@ class Device extends Controller
     public function index()
     {
         $this->type = $this->get['type'] ?? 'index';
-        AccountBind::mQuery()->layTable(function () {
+        PluginAccountBind::mQuery()->layTable(function () {
             $this->title = '终端账号管理';
             $this->types = Account::types(1);
         }, function (QueryHelper $query) {
@@ -75,7 +75,7 @@ class Device extends Controller
      */
     public function state()
     {
-        AccountBind::mSave($this->_vali([
+        PluginAccountBind::mSave($this->_vali([
             'status.in:0,1'  => '状态值范围异常！',
             'status.require' => '状态值不能为空！',
         ]));
@@ -87,6 +87,6 @@ class Device extends Controller
      */
     public function remove()
     {
-        AccountBind::mDelete();
+        PluginAccountBind::mDelete();
     }
 }

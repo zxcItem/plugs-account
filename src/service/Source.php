@@ -2,7 +2,7 @@
 
 namespace plugin\account\service;
 
-use plugin\account\model\AccountUser;
+use plugin\account\model\PluginAccountUser;
 
 /**
  * 用户来源分析
@@ -54,7 +54,7 @@ abstract class Source
     {
         try {
             self::$prov = array_map(function ($item) {
-                $item['value'] = AccountUser::mk()->whereLike('region_prov', "{$item['name']}%")->count();
+                $item['value'] = PluginAccountUser::mk()->whereLike('region_prov', "{$item['name']}%")->count();
                 return $item;
             }, self::$prov);
             return self::$prov;

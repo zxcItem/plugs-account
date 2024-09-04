@@ -4,7 +4,6 @@ declare (strict_types=1);
 
 namespace plugin\account;
 
-use plugin\account\model\AccountRelation;
 use think\admin\Plugin;
 
 /**
@@ -18,7 +17,7 @@ class Service extends Plugin
      * 定义插件名称
      * @var string
      */
-    protected $appName = '用户管理';
+    protected $appName = '账号管理';
 
     /**
      * 定义安装包名
@@ -27,30 +26,21 @@ class Service extends Plugin
     protected $package = 'xiaochao/plugs-account';
 
     /**
-     * 插件服务注册
-     * @return void
-     */
-    public function register(): void
-    {
-
-    }
-
-    /**
      * 菜单配置
      * @return array[]
      */
     public static function menu(): array
     {
         // 设置插件菜单
-        $code = self::getAppCode();
+        $code = app(static::class)->appCode;
         return [
             [
                 'name' => '用户管理',
                 'subs' => [
                     ['name' => '数据统计报表', 'icon' => 'layui-icon layui-icon-chart', 'node' => "{$code}/portal/index"],
                     ['name' => '用户账号管理', 'icon' => 'layui-icon layui-icon-username', 'node' => "{$code}/master/index"],
-                    ['name' => '终端用户管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$code}/device/index"],
-                    ['name' => '用户短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$code}/message/index"],
+                    ['name' => '终端账号管理', 'icon' => 'layui-icon layui-icon-cellphone', 'node' => "{$code}/device/index"],
+                    ['name' => '手机短信管理', 'icon' => 'layui-icon layui-icon-email', 'node' => "{$code}/message/index"],
                     ['name' => '用户附件管理', 'icon' => 'layui-icon layui-icon-file', 'node' => "{$code}/file/index"],
                 ],
             ],

@@ -32,40 +32,24 @@ class InstallAccount extends Migrator
      */
     public function change()
     {
-        $this->_create_menu();
-        $this->_create_account_auth();
-        $this->_create_account_bind();
-        $this->_create_account_msms();
-        $this->_create_account_user();
-        $this->_create_account_file();
-    }
-
-    /**
-     * 初始化系统菜单
-     * @return void
-     */
-    private function _create_menu()
-    {
-        // 初始化菜单数据
-        PhinxExtend::write2menu([
-            [
-                'name' => '用户管理',
-                'subs' => Service::menu(),
-            ],
-        ], ['url|node' => 'plugin-account/portal/index']);
+        $this->_create_plugin_account_auth();
+        $this->_create_plugin_account_bind();
+        $this->_create_plugin_account_msms();
+        $this->_create_plugin_account_user();
+        $this->_create_plugin_account_file();
     }
 
     /**
      * 插件-账号-授权
-     * @class AccountAuth
-     * @table account_auth
+     * @class PluginAccountAuth
+     * @table plugin_account_auth
      * @return void
      */
-    private function _create_account_auth()
+    private function _create_plugin_account_auth()
     {
 
         // 当前数据表
-        $table = 'account_auth';
+        $table = 'plugin_account_auth';
 
         // 存在则跳过
         if ($this->hasTable($table)) return;
@@ -81,11 +65,11 @@ class InstallAccount extends Migrator
             ->addColumn('tokenv', 'string', ['limit' => 32, 'default' => '', 'null' => true, 'comment' => '授权验证'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('usid', ['name' => 'idx_account_auth_usid'])
-            ->addIndex('type', ['name' => 'idx_account_auth_type'])
-            ->addIndex('time', ['name' => 'idx_account_auth_time'])
-            ->addIndex('token', ['name' => 'idx_account_auth_token'])
-            ->addIndex('create_time', ['name' => 'idx_account_auth_create_time'])
+            ->addIndex('usid', ['name' => 'i8a91c286f_usid'])
+            ->addIndex('type', ['name' => 'i8a91c286f_type'])
+            ->addIndex('time', ['name' => 'i8a91c286f_time'])
+            ->addIndex('token', ['name' => 'i8a91c286f_token'])
+            ->addIndex('create_time', ['name' => 'i8a91c286f_create_time'])
             ->create();
 
         // 修改主键长度
@@ -94,15 +78,15 @@ class InstallAccount extends Migrator
 
     /**
      * 插件-账号-终端
-     * @class AccountBind
-     * @table account_bind
+     * @class PluginAccountBind
+     * @table plugin_account_bind
      * @return void
      */
-    private function _create_account_bind()
+    private function _create_plugin_account_bind()
     {
 
         // 当前数据表
-        $table = 'account_bind';
+        $table = 'plugin_account_bind';
 
         // 存在则跳过
         if ($this->hasTable($table)) return;
@@ -126,16 +110,16 @@ class InstallAccount extends Migrator
             ->addColumn('deleted', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '删除状态(0未删,1已删)'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '注册时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('type', ['name' => 'idx_account_bind_type'])
-            ->addIndex('unid', ['name' => 'idx_account_bind_unid'])
-            ->addIndex('sort', ['name' => 'idx_account_bind_sort'])
-            ->addIndex('phone', ['name' => 'idx_account_bind_phone'])
-            ->addIndex('appid', ['name' => 'idx_account_bind_appid'])
-            ->addIndex('status', ['name' => 'idx_account_bind_status'])
-            ->addIndex('openid', ['name' => 'idx_account_bind_openid'])
-            ->addIndex('unionid', ['name' => 'idx_account_bind_unionid'])
-            ->addIndex('deleted', ['name' => 'idx_account_bind_deleted'])
-            ->addIndex('create_time', ['name' => 'idx_account_bind_create_time'])
+            ->addIndex('type', ['name' => 'i4ec9ee5c7_type'])
+            ->addIndex('unid', ['name' => 'i4ec9ee5c7_unid'])
+            ->addIndex('sort', ['name' => 'i4ec9ee5c7_sort'])
+            ->addIndex('phone', ['name' => 'i4ec9ee5c7_phone'])
+            ->addIndex('appid', ['name' => 'i4ec9ee5c7_appid'])
+            ->addIndex('status', ['name' => 'i4ec9ee5c7_status'])
+            ->addIndex('openid', ['name' => 'i4ec9ee5c7_openid'])
+            ->addIndex('unionid', ['name' => 'i4ec9ee5c7_unionid'])
+            ->addIndex('deleted', ['name' => 'i4ec9ee5c7_deleted'])
+            ->addIndex('create_time', ['name' => 'i4ec9ee5c7_create_time'])
             ->create();
 
         // 修改主键长度
@@ -144,15 +128,15 @@ class InstallAccount extends Migrator
 
     /**
      * 插件-账号-短信
-     * @class AccountMsms
-     * @table account_msms
+     * @class PluginAccountMsms
+     * @table plugin_account_msms
      * @return void
      */
-    private function _create_account_msms()
+    private function _create_plugin_account_msms()
     {
 
         // 当前数据表
-        $table = 'account_msms';
+        $table = 'plugin_account_msms';
 
         // 存在则跳过
         if ($this->hasTable($table)) return;
@@ -172,14 +156,14 @@ class InstallAccount extends Migrator
             ->addColumn('status', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '短信状态(0失败,1成功)'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('type', ['name' => 'idx_account_msms_type'])
-            ->addIndex('unid', ['name' => 'idx_account_msms_unid'])
-            ->addIndex('usid', ['name' => 'idx_account_msms_usid'])
-            ->addIndex('phone', ['name' => 'idx_account_msms_phone'])
-            ->addIndex('smsid', ['name' => 'idx_account_msms_smsid'])
-            ->addIndex('scene', ['name' => 'idx_account_msms_scene'])
-            ->addIndex('status', ['name' => 'idx_account_msms_status'])
-            ->addIndex('create_time', ['name' => 'idx_account_msms_create_time'])
+            ->addIndex('type', ['name' => 'i66baec398_type'])
+            ->addIndex('usid', ['name' => 'i66baec398_usid'])
+            ->addIndex('unid', ['name' => 'i66baec398_unid'])
+            ->addIndex('phone', ['name' => 'i66baec398_phone'])
+            ->addIndex('smsid', ['name' => 'i66baec398_smsid'])
+            ->addIndex('scene', ['name' => 'i66baec398_scene'])
+            ->addIndex('status', ['name' => 'i66baec398_status'])
+            ->addIndex('create_time', ['name' => 'i66baec398_create_time'])
             ->create();
 
         // 修改主键长度
@@ -188,15 +172,15 @@ class InstallAccount extends Migrator
 
     /**
      * 插件-账号-资料
-     * @class AccountUser
-     * @table account_user
+     * @class PluginAccountUser
+     * @table plugin_account_user
      * @return void
      */
-    private function _create_account_user()
+    private function _create_plugin_account_user()
     {
 
         // 当前数据表
-        $table = 'account_user';
+        $table = 'plugin_account_user';
 
         // 存在则跳过
         if ($this->hasTable($table)) return;
@@ -211,8 +195,8 @@ class InstallAccount extends Migrator
             ->addColumn('unionid', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => 'UnionID'])
             ->addColumn('username', 'string', ['limit' => 50, 'default' => '', 'null' => true, 'comment' => '用户姓名'])
             ->addColumn('nickname', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '用户昵称'])
+            ->addColumn('password', 'string', ['limit' => 32, 'default' => '', 'null' => true, 'comment' => '认证密码'])
             ->addColumn('headimg', 'string', ['limit' => 500, 'default' => '', 'null' => true, 'comment' => '用户头像'])
-            ->addColumn('password', 'string', ['limit' => 32, 'default' => '', 'null' => true, 'comment' => '登录密码'])
             ->addColumn('region_prov', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '所在省份'])
             ->addColumn('region_city', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '所在城市'])
             ->addColumn('region_area', 'string', ['limit' => 99, 'default' => '', 'null' => true, 'comment' => '所在区域'])
@@ -223,19 +207,19 @@ class InstallAccount extends Migrator
             ->addColumn('deleted', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '删除状态(0未删,1已删)'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '注册时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('code', ['name' => 'idx_account_user_code'])
-            ->addIndex('phone', ['name' => 'idx_account_user_phone'])
-            ->addIndex('email', ['name' => 'idx_account_user_email'])
-            ->addIndex('unionid', ['name' => 'idx_account_user_unionid'])
-            ->addIndex('username', ['name' => 'idx_account_user_username'])
-            ->addIndex('nickname', ['name' => 'idx_account_user_nickname'])
-            ->addIndex('region_prov', ['name' => 'idx_account_user_region_prov'])
-            ->addIndex('region_city', ['name' => 'idx_account_user_region_city'])
-            ->addIndex('region_area', ['name' => 'idx_account_user_region_area'])
-            ->addIndex('sort', ['name' => 'idx_account_user_sort'])
-            ->addIndex('status', ['name' => 'idx_account_user_status'])
-            ->addIndex('deleted', ['name' => 'idx_account_user_deleted'])
-            ->addIndex('create_time', ['name' => 'idx_account_user_create_time'])
+            ->addIndex('code', ['name' => 'iddb76b051_code'])
+            ->addIndex('sort', ['name' => 'iddb76b051_sort'])
+            ->addIndex('phone', ['name' => 'iddb76b051_phone'])
+            ->addIndex('email', ['name' => 'iddb76b051_email'])
+            ->addIndex('status', ['name' => 'iddb76b051_status'])
+            ->addIndex('unionid', ['name' => 'iddb76b051_unionid'])
+            ->addIndex('deleted', ['name' => 'iddb76b051_deleted'])
+            ->addIndex('username', ['name' => 'iddb76b051_username'])
+            ->addIndex('nickname', ['name' => 'iddb76b051_nickname'])
+            ->addIndex('region_prov', ['name' => 'iddb76b051_region_prov'])
+            ->addIndex('region_city', ['name' => 'iddb76b051_region_city'])
+            ->addIndex('region_area', ['name' => 'iddb76b051_region_area'])
+            ->addIndex('create_time', ['name' => 'iddb76b051_create_time'])
             ->create();
 
         // 修改主键长度
@@ -244,22 +228,22 @@ class InstallAccount extends Migrator
 
     /**
      * 用户附件
-     * @class AccountFile
-     * @table account_file
+     * @class PluginAccountFile
+     * @table plugin_account_file
      * @return void
      */
-    private function _create_account_file()
+    private function _create_plugin_account_file()
     {
 
         // 当前数据表
-        $table = 'account_file';
+        $table = 'plugin_account_file';
 
         // 存在则跳过
         if ($this->hasTable($table)) return;
 
         // 创建数据表
         $this->table($table, [
-            'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '用户-附件',
+            'engine' => 'InnoDB', 'collation' => 'utf8mb4_general_ci', 'comment' => '插件-账号-附件',
         ])
             ->addColumn('type', 'string', ['limit' => 20, 'default' => '', 'null' => true, 'comment' => '上传类型'])
             ->addColumn('name', 'string', ['limit' => 180, 'default' => '', 'null' => true, 'comment' => '文件名称'])
@@ -273,13 +257,13 @@ class InstallAccount extends Migrator
             ->addColumn('issafe', 'integer', ['limit' => 1, 'default' => 0, 'null' => true, 'comment' => '安全模式'])
             ->addColumn('create_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '创建时间'])
             ->addColumn('update_time', 'datetime', ['default' => NULL, 'null' => true, 'comment' => '更新时间'])
-            ->addIndex('type', ['name' => 'idx_account_file_type'])
-            ->addIndex('xext', ['name' => 'idx_account_file_xext'])
-            ->addIndex('xkey', ['name' => 'idx_account_file_xkey'])
-            ->addIndex('unid', ['name' => 'idx_account_file_unid'])
-            ->addIndex('name', ['name' => 'idx_account_file_name'])
-            ->addIndex('issafe', ['name' => 'idx_account_file_issafe'])
-            ->addIndex('isfast', ['name' => 'idx_account_file_isfast'])
+            ->addIndex('type', ['name' => 'idx_plugin_account_file_type'])
+            ->addIndex('xext', ['name' => 'idx_plugin_account_file_xext'])
+            ->addIndex('xkey', ['name' => 'idx_plugin_account_file_xkey'])
+            ->addIndex('unid', ['name' => 'idx_plugin_account_file_unid'])
+            ->addIndex('name', ['name' => 'idx_plugin_account_file_name'])
+            ->addIndex('issafe', ['name' => 'idx_plugin_account_file_issafe'])
+            ->addIndex('isfast', ['name' => 'idx_plugin_account_file_isfast'])
             ->create();
 
         // 修改主键长度

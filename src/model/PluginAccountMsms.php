@@ -9,10 +9,10 @@ use plugin\account\service\Message;
 
 /**
  * 账号短信验证模型
- * @class AccountMsms
+ * @class PluginAccountMsms
  * @package plugin\account\model
  */
-class AccountMsms extends Abs
+class PluginAccountMsms extends Abs
 {
     /**
      * 格式化数据

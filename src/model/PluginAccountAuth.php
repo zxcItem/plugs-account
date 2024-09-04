@@ -9,10 +9,10 @@ use think\model\relation\HasOne;
 
 /**
  * 子账号授权模型
- * @class AccountAuth
+ * @class PluginAccountAuth
  * @package plugin\account\model
  */
-class AccountAuth extends Abs
+class PluginAccountAuth extends Abs
 {
     /**
      * 关联子账号
@@ -20,6 +20,6 @@ class AccountAuth extends Abs
      */
     public function client(): HasOne
     {
-        return $this->hasOne(AccountBind::class, 'id', 'usid')->with(['user']);
+        return $this->hasOne(PluginAccountBind::class, 'id', 'usid')->with(['user']);
     }
 }

@@ -5,8 +5,8 @@ declare (strict_types=1);
 namespace plugin\account\controller\api\auth;
 
 use plugin\account\controller\api\Auth;
-use plugin\account\model\AccountAuth;
-use plugin\account\model\AccountBind;
+use plugin\account\model\PluginAccountAuth;
+use plugin\account\model\PluginAccountBind;
 use plugin\account\service\Message;
 use think\admin\service\RuntimeService;
 use think\admin\Storage;
@@ -71,8 +71,8 @@ class Center extends Auth
         if (($user = $this->account->user())->isExists()) try {
             $this->app->db->transaction(function () use ($user) {
                 $user->save(['deleted' => 1, 'remark' => '用户主动申请注销账号！']);
-                AccountAuth::mk()->where(['usid' => $this->usid])->delete();
-                AccountBind::mk()->where(['unid' => $this->unid])->delete();
+                PluginAccountAuth::mk()->where(['usid' => $this->usid])->delete();
+                PluginAccountBind::mk()->where(['unid' => $this->unid])->delete();
             });
             $this->success('账号注销成功！');
         } catch (HttpResponseException $exception) {

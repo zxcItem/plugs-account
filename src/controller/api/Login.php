@@ -5,7 +5,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller\api;
 
-use plugin\account\model\AccountUser;
+use plugin\account\model\PluginAccountUser;
 use plugin\account\service\Account;
 use plugin\account\service\Message;
 use think\admin\Controller;
@@ -75,7 +75,7 @@ class Login extends Controller
             $data = $this->_vali(['code.require' => '授权编号为空！']);
             $vars = CodeExtend::decrypt($data['code'], JwtExtend::jwtkey());
             if (is_array($vars) && isset($vars['unid'])) {
-                $user = AccountUser::mk()->findOrEmpty($vars['unid']);
+                $user = PluginAccountUser::mk()->findOrEmpty($vars['unid']);
                 if ($user->isEmpty()) $this->error('无效账号！');
                 $inset = ['phone' => $user->getAttr('phone')];
                 $account = Account::mk(Account::WAP, $inset);

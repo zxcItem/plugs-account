@@ -2,7 +2,7 @@
 
 namespace plugin\account\controller;
 
-use plugin\account\model\AccountUser;
+use plugin\account\model\PluginAccountUser;
 use plugin\account\service\Source;
 use think\admin\Controller;
 use think\db\exception\DbException;
@@ -38,7 +38,7 @@ class Portal extends Controller
                 $date = date('Y-m-d H',strtotime(date('Y-m-d')) + $i * 3600);
                 $this->userHours[] = [
                     '当天时间' => date('H:i', strtotime(date('Y-m-d')) + $i * 3600),
-                    '今日统计' => AccountUser::mk()->whereLike('create_time', "{$date}%")->count()
+                    '今日统计' => PluginAccountUser::mk()->whereLike('create_time', "{$date}%")->count()
                 ];
             }
             $this->app->cache->set('userHours', $this->userHours, 60);
@@ -47,7 +47,7 @@ class Portal extends Controller
         $this->userMonth = $this->app->cache->get('userMonth', []);
         if (empty($this->userMonth)) {
             $field = ['count(1)' => 'count', 'left(create_time,10)' => 'mday'];
-            $model = AccountUser::mk()->field($field);
+            $model = PluginAccountUser::mk()->field($field);
             $users = $model->whereTime('create_time', '-30 days')->where(['deleted' => 0])->group('mday')->select()->column(null, 'mday');
             for ($i = 30; $i >= 0; $i--) {
                 $date = date('Y-m-d', strtotime("-{$i}days"));

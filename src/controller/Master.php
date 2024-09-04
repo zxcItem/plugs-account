@@ -5,7 +5,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller;
 
-use plugin\account\model\AccountUser;
+use plugin\account\model\PluginAccountUser;
 use think\admin\Controller;
 use think\admin\helper\QueryHelper;
 
@@ -27,7 +27,7 @@ class Master extends Controller
     public function index()
     {
         $this->type = $this->get['type'] ?? 'index';
-        AccountUser::mQuery()->layTable(function () {
+        PluginAccountUser::mQuery()->layTable(function () {
             $this->title = '用户账号管理';
         }, function (QueryHelper $query) {
             $query->where(['deleted' => 0, 'status' => intval($this->type === 'index')]);
@@ -41,7 +41,7 @@ class Master extends Controller
      */
     public function state()
     {
-        AccountUser::mSave($this->_vali([
+        PluginAccountUser::mSave($this->_vali([
             'status.in:0,1'  => '状态值范围异常！',
             'status.require' => '状态值不能为空！',
         ]));
@@ -53,6 +53,6 @@ class Master extends Controller
      */
     public function remove()
     {
-        AccountUser::mDelete();
+        PluginAccountUser::mDelete();
     }
 }

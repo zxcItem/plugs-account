@@ -18,7 +18,7 @@ declare (strict_types=1);
 
 namespace plugin\account\controller;
 
-use plugin\account\model\AccountMsms;
+use plugin\account\model\PluginAccountMsms;
 use plugin\account\service\Message as MessageService;
 use plugin\account\service\message\Alisms;
 use think\admin\Controller;
@@ -59,7 +59,7 @@ class Message extends Controller
      */
     public function index()
     {
-        AccountMsms::mQuery()->layTable(function () {
+        PluginAccountMsms::mQuery()->layTable(function () {
             $this->title = '手机短信管理';
             $this->scenes = MessageService::$scenes;
         }, static function (QueryHelper $query) {

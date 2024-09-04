@@ -10,10 +10,10 @@ use think\model\relation\HasOne;
 
 /**
  * 用户子账号模型
- * @class AccountBind
+ * @class PluginAccountBind
  * @package plugin\account\model
  */
-class AccountBind extends Abs
+class PluginAccountBind extends Abs
 {
     /**
      * 关联主账号
@@ -21,7 +21,7 @@ class AccountBind extends Abs
      */
     public function user(): HasOne
     {
-        return $this->hasOne(AccountUser::class, 'id', 'unid');
+        return $this->hasOne(PluginAccountUser::class, 'id', 'unid');
     }
 
     /**
@@ -30,7 +30,7 @@ class AccountBind extends Abs
      */
     public function auths(): HasMany
     {
-        return $this->hasMany(AccountAuth::class, 'usid', 'id');
+        return $this->hasMany(PluginAccountAuth::class, 'usid', 'id');
     }
 
     /**
