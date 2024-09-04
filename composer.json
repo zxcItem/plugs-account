@@ -1,7 +1,7 @@
 {
-    "type": "project",
+    "type": "think-admin-plugin",
     "name": "xiaochao/plugs-account",
-    "description": "PlugsAccount for ThinkAdmin",
+    "version": "dev-master",
     "authors": [
         {
             "name": "叶落无痕",
@@ -9,17 +9,11 @@
         }
     ],
     "require": {
-        "xiaochao/plugs-account": "dev-master"
+        "php": ">7.1"
     },
     "autoload": {
         "psr-4": {
             "plugin\\account\\": "src"
-        }
-    },
-    "repositories": {
-        "PlugsAccount": {
-            "type": "path",
-            "url": "plugs/plugs-account"
         }
     },
     "extra": {
