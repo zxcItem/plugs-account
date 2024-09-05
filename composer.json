@@ -21,7 +21,7 @@
             "type": "plugin",
             "cover": "layui-icon layui-icon-username",
             "name": "用户账号管理",
-            "description": "平台用户账号登录注册模块，可创建用户"
+            "description": "平台用户模块，包含：数据统计,登录注册,手机短信,用户附件"
         },
         "think": {
             "services": [
