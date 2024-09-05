@@ -12,7 +12,7 @@ use think\admin\helper\QueryHelper;
 /**
  * 用户账号管理
  * @class Master
- * @package plugin\account\controller\user
+ * @package plugin\account\controller
  */
 class Master extends Controller
 {

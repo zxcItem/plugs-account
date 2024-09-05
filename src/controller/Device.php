@@ -12,7 +12,7 @@ use think\admin\helper\QueryHelper;
 /**
  * 终端账号管理
  * @class Device
- * @package plugin\account\controller\Device
+ * @package plugin\account\controller
  */
 class Device extends Controller
 {
