@@ -19,7 +19,9 @@
     "extra": {
         "config": {
             "type": "plugin",
-            "name": "用户账号管理"
+            "cover": "layui-icon layui-icon-username",
+            "name": "用户账号管理",
+            "description": "平台用户账号登录注册模块，可创建用户"
         },
         "think": {
             "services": [
