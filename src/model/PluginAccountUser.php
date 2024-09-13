@@ -21,4 +21,21 @@ class PluginAccountUser extends Abs
     {
         return $this->hasMany(PluginAccountBind::class, 'unid', 'id');
     }
+
+    /**
+     * 获取扩展数据
+     * @param int $unid
+     * @param array $data
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public static function extraItem(int $unid, array $data)
+    {
+        $user = static::mk()->where('id',$unid)->find()->toArray();
+        foreach ($data as &$datum) $datum['amount'] = $user['extra'][$datum['name']] ?? 0;
+        $user['extra_arry'] = $data;
+        return $user;
+    }
 }
